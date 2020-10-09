@@ -12,7 +12,10 @@ function data = parseADM(filename)
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
 % October 2020; Last revision: 5-Oct-2020
-
+%
+% TO-DO: 
+%     -parse through UNITS
+%
 %------------- BEGIN CODE --------------
 % Split file by lines
 filecontents = strsplit(fileread(filename),'\n');
@@ -153,10 +156,5 @@ for i = 1:length(line)
 
 end
     
-
-%     name = char(line(1));
-%     data.(name) = line(2);
-
 %------------- END OF CODE --------------
-a = 1
 end
