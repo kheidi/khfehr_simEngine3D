@@ -1,9 +1,24 @@
 function results = con_CD(r_i,p_i,p_i_dot,r_j,p_j,p_j_dot,s_i_P_bar,s_j_P_bar,c,f,df,ddf)
 % CDDIRECT 
 %
+% Input:
+%
+%     -r_i
+%     -r_j
+%     -p_i
+%     -p_i_dot
+%     -p_j
+%     -p_j_dot
+%     -s_i_P_bar
+%     -s_j_P_bar
+%     -c
+%     -f
+%     -df
+%     -ddf
+%         
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
-% October 2020; Last revision: 8-Oct-2020
+% October 2020
 %
 % TO-DO:
 
