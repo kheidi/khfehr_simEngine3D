@@ -12,15 +12,15 @@ function [phiResults,location] = simEngine3D_A6P2(T)
     %% Knowns
     L=2;
     syms t;
-    theta = @(t) (pi/4)*cosd(2*t); %change to input
+    theta = @(t) (pi/4)*cos(2*t); %change to input
     dtheta = matlabFunction( diff(theta(t)) );
     ddtheta = matlabFunction( diff(dtheta(t)) );
 
     %% Guess Parameters
     guess.p_i = getEParams([0;0;0]);
-    guess.p_j = getEParams([-90;-90;90+theta(T)-2]);
+    guess.p_j = getEParams([-90;-90;110]);
     guess.r_i = [0;0;0];
-    guess.r_j = [0;1;-1];
+    guess.r_j = [0;-2*sind(45);-2*sind(45)];
     f = @(t) cos((pi/4)*cos(2*t)); %change to input
     df = matlabFunction( diff(f(t)) );
     ddf = matlabFunction( diff(df(t)) );
@@ -73,8 +73,8 @@ function [phiResults,location] = simEngine3D_A6P2(T)
         %%% Movement Function 
         % Driving Constraint
         clear data; data = guess;
-        data.a_i_bar = [0;0;-1]; %z axis of G-RF, this is what we want to set the angle with respect to
-        data.a_j_bar = [1;0;0];
+        data.a_i_bar = [0;0;1]; %z axis of G-RF, this is what we want to set the angle with respect to
+        data.a_j_bar = [-1;0;0];
         con6 = con_DP1(data,'phi','phi_r','phi_p');
 
         %%% Euler Param Constraint
@@ -132,8 +132,8 @@ function [phiResults,location] = simEngine3D_A6P2(T)
     %% Evaluate results
     % 
     clear data; data = guess;
-    data.a_i_bar = [0;0;-1]; %z axis of G-RF, this is what we want to set the angle with respect to
-    data.a_j_bar = [1;0;0];
+    data.a_i_bar = [0;0;1]; %z axis of G-RF, this is what we want to set the angle with respect to
+    data.a_j_bar = [-1;0;0];
     data.p_i_dot = getEParams([0;0;0]);
     data.p_j_dot = getEParams([0;0;dtheta(T)]);
     qdresults = con_DP1(data,'phi','phi_r','phi_p','gamma','nu');
