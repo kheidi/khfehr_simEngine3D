@@ -15,7 +15,7 @@ syms t;
 
 %% Guess Parameters
 guess.p_i = getEParams([0;0;0]);
-guess.p_j = getEParams([-90;-90;90+45]);
+guess.p_j = getEParams([-90;-90;90+30]);
 guess.r_i = [0;0;0];
 guess.r_j = [0;2*sind(45);2*sind(45)];
 f = @(t) cosd((pi/4)*cosd(2*t)); %change to input
@@ -36,11 +36,15 @@ for i = 1:10
     data.a_i_bar = [0;0;1]; %same as ai, Z axis of ground
 
     data.f = 0;
+    data.df = 0;
+    data.ddf = 0;
     con1 = con_DP1(data,'phi','phi_r','phi_p');
 
     data.a_j_bar = [0;0;1]; %cj bar
     data.a_i_bar = [0;1;0]; %same as ai, Y axis of ground
     data.f = 0;
+    data.df = 0;
+    data.ddf = 0;
     con2 = con_DP1(data,'phi','phi_r','phi_p');
 
     %%% Spherical
@@ -49,6 +53,8 @@ for i = 1:10
     data.s_i_P_bar = [0;0;0]; %also s_i_P since A = I
     data.s_j_P_bar = [-L;0;0];
     data.f = 0;
+    data.df = 0;
+    data.ddf = 0;
     data.c = [1;0;0];
     con3 = con_CD(data,'phi','phi_r','phi_p');
 
@@ -61,7 +67,7 @@ for i = 1:10
 
     %%% Movement Function 
     % Driving Constraint
-
+    clear data; data = guess;
     data.a_i_bar = [0;0;-1]; %z axis of G-RF, this is what we want to set the angle with respect to
     data.a_j_bar = [1;0;0];
     con6 = con_DP1(data,'phi','phi_r','phi_p');
@@ -89,7 +95,7 @@ for i = 1:10
         con7.phi_r(4:6),con7.phi_p(5:8)];
 
     %%% phi_Q
-    % This is the collection of each phi value
+    % This is the collection of all phi values
     phi_Q = [con1.phi;
         con2.phi;
         con3.phi;
@@ -99,7 +105,8 @@ for i = 1:10
         con7.phi];
 
     %%% New r-p
-    rp_next = rp-(phi_q.'*phi_Q)
+    rp_next = rp-(inv(phi_q)*phi_Q)
+    store(:,i) = rp_next;
     
     guess.r_j = rp_next(1:3);
     guess.p_j = rp_next(4:7);
@@ -107,5 +114,8 @@ for i = 1:10
 
 end
 
-
-
+figure;
+hold on
+for j = 1:i
+    plot(store(j,:),'-*')
+end
