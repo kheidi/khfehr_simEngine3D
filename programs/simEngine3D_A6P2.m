@@ -7,8 +7,11 @@
 %
 % TO-DO: 
 
+
+clear
 %% Knowns
 L=2;
+syms t;
 
 %% Guess Parameters
 guess.p_i = getEParams([0;0;0]);
@@ -62,7 +65,40 @@ data.a_j_bar = [1;0;0];
 con6 = con_DP1(data,'phi','phi_r','phi_p');
 
 %%% Euler Param Constraint
-con7 = data.p_j.'*data.p_j - 1;
+con7.phi = data.p_j.'*data.p_j - 1;
+con7.phi_r = [0;0;0;0;0;0].';
+con7.phi_p = [2;2;2;2;2;2;2;2].';
+
+%% Calculations for Newton Rhapson
+
+%%% Current r-p
+rp = [guess.r_j;guess.p_j];
+
+%%% Build Phi_q
+% We only care about solving for the body j so we will only keep the
+% sections that pertain to it.
+phi_q = [
+    con1.phi_r(4:6),con1.phi_p(5:8);
+    con2.phi_r(4:6),con2.phi_p(5:8);
+    con3.phi_r(4:6),con3.phi_p(5:8);
+    con4.phi_r(4:6),con4.phi_p(5:8);
+    con5.phi_r(4:6),con5.phi_p(5:8);
+    con6.phi_r(4:6),con6.phi_p(5:8);
+    con7.phi_r(4:6),con7.phi_p(5:8)];
+
+%%% phi_Q
+% This is the collection of each phi value
+phi_Q = [
+    con1.phi;
+    con2.phi;
+    con3.phi;
+    con4.phi;
+    con5.phi;
+    con6.phi;
+    con7.phi];
+    
+%%% New r-p
+rp_next = rp-(phi_q*phi_Q)
 
 
 
