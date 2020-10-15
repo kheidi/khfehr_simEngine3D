@@ -1,4 +1,4 @@
-function x = simEngine3D_A6P2(T)
+function [phiResults,location] = simEngine3D_A6P2(T)
 %% Pendulum Assignment
 % This program simulates a 3D pendulum with a movement of theta(t) =
 % (pi/4)*cos(2t)
@@ -29,8 +29,11 @@ function x = simEngine3D_A6P2(T)
     guess.f = f(T);
     guess.df = df(T);
     guess.ddf = ddf(T);
-
-    for i = 1:25
+    
+    error = 100;
+    i =0;
+    while error>1e-5
+        i = i+1;
 
         %% Constraints
         %%% Parallel-1
@@ -109,21 +112,23 @@ function x = simEngine3D_A6P2(T)
             con7.phi];
 
         %%% New r-p
-        rp_next = rp-(inv(phi_q)*phi_Q)
+        rp_next = rp-(inv(phi_q)*phi_Q);
         store(:,i) = rp_next;
+        error = norm(rp-rp_next);
 
         guess.r_j = rp_next(1:3);
         guess.p_j = rp_next(4:7);
 
+        
 
     end
 
     % Plot results to see convergence
-    figure;
-    hold on
-    for j = 1:7
-        plot(store(j,:),'-*')
-    end
+%     figure;
+%     hold on
+%     for j = 1:7
+%         plot(store(j,:),'-*')
+%     end
 
     %% Evaluate results
     % 
@@ -133,7 +138,7 @@ function x = simEngine3D_A6P2(T)
     data.p_i_dot = getEParams([0;0;0]);
     data.p_j_dot = getEParams([0;0;dtheta(T)]);
     qdresults = con_DP1(data,'phi','phi_r','phi_p','gamma','nu');
-    x.phiResults = qdresults;
-    x.location = rp_next;
+    phiResults = qdresults;
+    location = rp_next;
 
 end
