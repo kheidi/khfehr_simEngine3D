@@ -18,14 +18,13 @@ function [phiResults,location] = simEngine3D_A6P2(T)
 
     %% Guess Parameters
     guess.p_i = getEParams([0;0;0]);
-    guess.p_j = getEParams([-90;-90;90+theta(T)-10]);
+    guess.p_j = getEParams([-90;-90;90+theta(T)-2]);
     guess.r_i = [0;0;0];
-    guess.r_j = [0;2*sind(45);2*sind(45)];
-    f = @(t) cosd((pi/4)*cosd(2*t)); %change to input
+    guess.r_j = [0;1;-1];
+    f = @(t) cos((pi/4)*cos(2*t)); %change to input
     df = matlabFunction( diff(f(t)) );
     ddf = matlabFunction( diff(df(t)) );
 
-    T = 0; %change to input
     guess.f = f(T);
     guess.df = df(T);
     guess.ddf = ddf(T);
