@@ -39,14 +39,17 @@ figure;
 sgtitle("Plot Position of Q");
 subplot(3,1,1);
 yline(0,'-r')
+xlim([0 10])
 title('X Position')
 
 subplot(3,1,2);
 yline(0,'-r')
+xlim([0 10])
 title('Y Position')
 
 subplot(3,1,3);
 yline(0,'-r')
+xlim([0 10])
 title('Z Position')
 
 %% Plot Velocity
@@ -62,11 +65,13 @@ sgtitle("Acceleration of O'")
 %% Plot Acceleration
 figure;
 yline(0,'-r')
+xlim([0 10])
 sgtitle("Acceleration of Q'")
 
 %% Plot Velocity
 figure;
 yline(0,'-r')
+xlim([0 10])
 sgtitle("Velocity of Q")
 
 hold off

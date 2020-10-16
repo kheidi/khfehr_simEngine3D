@@ -1,6 +1,10 @@
 function results = con_DP1(obj,varargin)
 % CON_DP1
-% 
+%   Reflects the fact that the motion is such that the dot product between
+%   a vector attached to body i and a second vector attached to body j
+%   assuses a specified value. (Definition: Dan Negrut, ME 751, UW Madison, 
+%   Lecture 8, Slide 34)
+%
 % All possible inputs:
 %     -p_i
 %     -p_i_dot
@@ -20,12 +24,7 @@ function results = con_DP1(obj,varargin)
 %
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
-% October 2020; Last revision: 6-Oct-2020
-%
-% TO-DO: 
-%     -
-
-
+% October 2020; Last revision
     %Which flag/s is/are activated?
     findPhi = ismember('phi',varargin);
     findNu = ismember('nu',varargin);

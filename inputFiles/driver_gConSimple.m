@@ -40,7 +40,8 @@ data.f = 1.2;
 data.df = 2.5;
 data.ddf = 0.2;
 
-solDP1 = con_D(data,'gamma')
+solD = con_D(data,'phi', 'gamma','nu', 'phi_p','phi_r')
+solDP2 = con_D(data,'phi', 'gamma','nu', 'phi_p','phi_r')
 %solDP1 = con_DP1(p_i,p_i_dot,p_j,p_j_dot,a_i_bar,a_j_bar,f,df,ddf)
 % solDP1 = con_DP1(p_i,p_i_dot,p_j,p_j_dot,a_i_bar,a_j_bar,f,df,ddf,'phi')
 % solCD = con_CD(r_i,p_i,p_i_dot,r_j,p_j,p_j_dot,s_i_P_bar,s_j_P_bar,c,f,df,ddf)
