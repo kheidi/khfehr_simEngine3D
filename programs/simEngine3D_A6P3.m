@@ -37,6 +37,14 @@ for i = 1:length(time)
     
 end
 
+%% Plot Torque
+figure; 
+plot(torque(1,:));
+hold on;
+plot(torque(2,:));
+plot(torque(3,:));
+legend('X','Y','Z');
+
 %% Plot Position of O'
 
 figure;
