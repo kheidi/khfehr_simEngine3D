@@ -1,4 +1,4 @@
-function [phiResults,location] = simEngine3D_A6P2(T,previous)
+function [results,location] = simEngine3D_A6P2(T,previous)
 %% Pendulum Assignment
 % This program simulates a 3D pendulum with a movement of theta(t) =
 % (pi/4)*cos(2t)
@@ -150,7 +150,7 @@ function [phiResults,location] = simEngine3D_A6P2(T,previous)
     data.q_dot = q_dot;
     data.r_j_dot = q_dot(1:3);
     data.p_j_dot = q_dot(4:7);
-    data.p_i_dot = getEParams([0;0;0]);
+    data.p_i_dot = [0;0;0;0];%getEParams([0;0;0]);
     
     %%% Driving Constraint
     data.a_i_bar = [0;1;0]; %z axis of G-RF, this is what we want to set the angle with respect to
@@ -200,29 +200,17 @@ function [phiResults,location] = simEngine3D_A6P2(T,previous)
             con6.gamma;
             con7.gamma];        
     
-    q_ddot = inv(phi_q)*gamma_array
+    q_ddot = inv(phi_q)*gamma_array;
     
     
-    phiResults = drivingConstraints;
+    results.q_dot = q_dot;
+    results.q_ddot = q_ddot;
     location = rp_next;
     
-%     %%% Parallel-1
-%     clear data; data = guess
-%     data.a_j_bar = [0;0;1]; %cj bar?
-%     data.a_i_bar = [0;0;1]; %same as ai, Z axis of ground
-% 
-%     data.f = 0;
-%     data.df = 0;
-%     data.ddf = 0;
-%     con1 = con_DP1(data,'phi','phi_r','phi_p');
-% 
-%     data.a_j_bar = [0;0;1]; %cj bar
-%     data.a_i_bar = [0;1;0]; %same as ai, Y axis of ground
-%     data.f = 0;
-%     data.df = 0;
-%     data.ddf = 0;
-%     con2 = con_DP1(data,'phi','phi_r','phi_p');
-%     
+    
+    
+
+
     
 
 end

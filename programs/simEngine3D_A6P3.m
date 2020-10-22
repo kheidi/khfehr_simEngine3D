@@ -5,9 +5,8 @@ initial = [.7;.1;.7;.1];
 for i = 1:length(time)
     [phiResultsD,locationD] = simEngine3D_A6P2(time(i),initial);
     location(:,i) = locationD;
-    phi(i,1) = phiResultsD.phi;
-    nu(i,1) = phiResultsD.nu;
-    gamma(i,1) = phiResultsD.gamma(1).';
+    velocity(:,i) = phiResultsD.q_dot;
+    acceleration(:,i) = phiResultsD.q_ddot;
     initial = locationD(4:7);
 end
 
@@ -54,13 +53,21 @@ title('Z Position')
 
 %% Plot Velocity
 figure;
-plot(time,nu)
+hold on;
+plot(time,velocity(2,:));
+plot(time,velocity(3,:));
+legend('Vel in Y', 'Vel in Z');
 sgtitle("Velocity of O'")
+hold off
 
 %% Plot Acceleration
 figure;
-plot(time,gamma)
+hold on;
+plot(time,acceleration(2,:));
+plot(time,acceleration(3,:));
+legend('Acc in Y', 'Acc in Z');
 sgtitle("Acceleration of O'")
+hold off
 
 %% Plot Acceleration
 figure;
