@@ -1,13 +1,26 @@
 clear
+%% Knowns
+density = 7800;
+L = 2;
+dim_a = 0.05 %square bar
+mass = density*((dim_a^2)*L)
+g = 9.81;
+F = [0;0;mass*g];
+J_bar = getJSymmetric(mass,dim_a)
+
 time = 0:10e-3:10;
 initial = [.7;.1;.7;.1];
 
 for i = 1:length(time)
-    [phiResultsD,locationD] = simEngine3D_A6P2(time(i),initial);
+    [results,locationD] = simEngine3D_A6P2(time(i),initial);
     location(:,i) = locationD;
-    velocity(:,i) = phiResultsD.q_dot;
-    acceleration(:,i) = phiResultsD.q_ddot;
+    velocity(:,i) = results.q_dot;
+    acceleration(:,i) = results.q_ddot;
     initial = locationD(4:7);
+    BB = getBigBlue(results.q, results.phi_q,mass,dim_a);
+    G_dot = getG(results.q_dot(4:7))
+    tau(:,i) = 8*G_dot.'*J_bar*G_dot*results.q(4:7)
+    
 end
 
 %% Plot Position of O'

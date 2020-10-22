@@ -89,7 +89,7 @@ function [results,location] = simEngine3D_A6P2(T,previous)
         %%% Current r-p
         rp = [guess.r_j;guess.p_j];
 
-        %%% Build Phi_q
+        %%% Build Phi_q / Jacobian
         % We only care about solving for the body j so we will only keep the
         % sections that pertain to it.
         phi_q = [
@@ -189,7 +189,7 @@ function [results,location] = simEngine3D_A6P2(T,previous)
     data.c = [0;0;1];
     con5 = con_CD(data,'gamma');
     
-    con7.gamma = 0;
+    con7.gamma = [-2*data.p_j_dot.'*data.p_j_dot];
     
     gamma_array = [
             con1.gamma;
@@ -200,12 +200,15 @@ function [results,location] = simEngine3D_A6P2(T,previous)
             con6.gamma;
             con7.gamma];        
     
+    
     q_ddot = inv(phi_q)*gamma_array;
     
     
     results.q_dot = q_dot;
     results.q_ddot = q_ddot;
     location = rp_next;
+    results.q = location;
+    results.phi_q = phi_q;
     
     
     
