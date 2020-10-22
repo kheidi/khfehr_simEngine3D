@@ -2,11 +2,11 @@ clear
 %% Knowns
 density = 7800;
 L = 2;
-dim_a = 0.05 %square bar
-mass = density*((dim_a^2)*L)
+dim_a = 0.05; %square bar
+mass = (density*((dim_a^2)*L))/100;
 g = 9.81;
 F = [0;0;mass*g];
-J_bar = getJSymmetric(mass,dim_a)
+J_bar = getJSymmetric(mass,dim_a);
 
 time = 0:10e-3:10;
 initial = [.7;.1;.7;.1];
@@ -18,8 +18,22 @@ for i = 1:length(time)
     acceleration(:,i) = results.q_ddot;
     initial = locationD(4:7);
     BB = getBigBlue(results.q, results.phi_q,mass,dim_a);
-    G_dot = getG(results.q_dot(4:7))
-    tau(:,i) = 8*G_dot.'*J_bar*G_dot*results.q(4:7)
+    G_dot = getG(results.q_dot(4:7));
+    tau_hat(:,i) = 85*G_dot.'*J_bar*G_dot*results.q(4:7);
+    P = getP(location(4:7,i));
+    M = getM(mass);
+    p(:,1) = location(4:7,i);
+    J_p = getJ_p_symm(p,mass,dim_a);
+    mat1 = zeros(7,7);
+    mat1(1:3,1:6) = results.phi_r(1:6,:).';
+    mat1(4:7,1:6) = results.phi_p(1:6,:).';
+    mat1(4:7,7) = P.';
+    mat2 = [
+        F-M*results.q_ddot(1:3);
+        tau_hat(:,i)-J_p*results.q_ddot(4:7)];
+    lambda = mat1\mat2;
+    reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
+    torque(:,i) = reaction(4:6);
     
 end
 

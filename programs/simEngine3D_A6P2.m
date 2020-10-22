@@ -209,6 +209,10 @@ function [results,location] = simEngine3D_A6P2(T,previous)
     location = rp_next;
     results.q = location;
     results.phi_q = phi_q;
+    results.phi_r = phi_q(:,1:3);
+    results.phi_p = phi_q(:,4:7);
+    results.gamma_array = gamma_array;
+    results.gamma_p = con7.gamma;
     
     
     
