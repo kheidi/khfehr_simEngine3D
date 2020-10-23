@@ -3,11 +3,11 @@
 %
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
-% October 2020; Last revision: 14-Oct-2020
+% October 2020
 %
 % TO-DO: 
 %   -
-
+clear
 %% KNOWNS
 h = 0.01;
 x_array(1) = 0;
@@ -30,15 +30,15 @@ J_g_y = @(x,y) 1 + ((h*x)/(1+x^2));
 %% NR Solve
 % Initialize:
 f_prev = zeros(1,length(time));
-g_prev = zeros(1,length(time))
-;
+g_prev = zeros(1,length(time));
 x_prev = 0;
 y_prev = 2;
 error = 1;
 c = 1; %count
 
-for i = 2:length(time)
+for i = 2:length(time)-1
     
+    c = 1;
     
     f_first(1,i) = f_prev(1,i-1) + h*f(f_prev(1,i-1),g_prev(1,i-1));
     g_first(1,i) = g_prev(1,i-1) + h*f(f_prev(1,i-1),g_prev(1,i-1));
@@ -67,20 +67,18 @@ for i = 2:length(time)
         f_new(1,c+1) = f_new(1,c) + delta(1);
         g_new(1,c+1) = g_new(1,c) + delta(2);
         
-        error = norm(f_new(1,c+1)-f_new(1,c));
+        error = norm(f_new(1,c+1)-f_new(1,c))+norm(g_new(1,c+1)-g_new(1,c));
             
         if c > 30
             break
         end
+        c = c+1;
     end
     
-    c = c + 1;
-    
-    %Update previous
-    f_prev(1,i) = f_new
+    f_prev(1,i+1) = f_new(1,c);
 
 end
 
 figure;
-plot(x_array)
+plot(time, f_prev)
     
