@@ -29,12 +29,12 @@ J_g_y = @(x,y) 1 + ((h*x)/(1+x^2));
 
 %% NR Solve
 % Initialize:
-f_prev = zeros(1,length(time))
+f_prev = zeros(1,length(time));
 g_prev = zeros(1,length(time))
-
+;
 x_prev = 0;
 y_prev = 2;
-
+error = 1;
 c = 1; %count
 
 for i = 2:length(time)
@@ -44,14 +44,14 @@ for i = 2:length(time)
     g_first(1,i) = g_prev(1,i-1) + h*f(f_prev(1,i-1),g_prev(1,i-1));
     
     %Evaulate at current
-    f_eval = f(f_first(1,i),g_first(1,i))
-    g_eval = g(f_first(1,i),g_first(1,i))
+    f_eval = f(f_first(1,i),g_first(1,i));
+    g_eval = g(f_first(1,i),g_first(1,i));
     
     %First guess
     f_new(1,1) = f_prev(1,i-1) + h*f_eval;
     g_new(1,1) = g_prev(1,i-1) + h*g_eval;
     
-    while error > 0.001
+    while error > 0.00001
         f_eval = f(f_new(1,c),g_new(1,c));
         g_eval = g(f_new(1,c),g_new(1,c));
         
@@ -61,10 +61,14 @@ for i = 2:length(time)
             g_new(1,c) - g_prev(1,i-1) - h*g_eval];
         J = [
             J_f_x(f_new(1,c),g_new(1,c)),J_f_y(f_new(1,c),g_new(1,c));
-            J_g_x(f_new(1,c),g_new(1,c)),J_g_y(f_new(1,c),g_new(1,c))]
+            J_g_x(f_new(1,c),g_new(1,c)),J_g_y(f_new(1,c),g_new(1,c))];
         delta = J\-fg;
-            
         
+        f_new(1,c+1) = f_new(1,c) + delta(1);
+        g_new(1,c+1) = g_new(1,c) + delta(2);
+        
+        error = norm(f_new(1,c+1)-f_new(1,c));
+            
         if c > 30
             break
         end
@@ -72,16 +76,9 @@ for i = 2:length(time)
     
     c = c + 1;
     
-    
-    
-    x = x_array(i);
-    y = y_array(i);
+    %Update previous
+    f_prev(1,i) = f_new
 
-    delta = inv(J)*-g
-    x_array(i+1) = x+delta(1);
-    y_array(i+1) = y+delta(2);
-    x_prev = x;
-    y_prev = y;
 end
 
 figure;

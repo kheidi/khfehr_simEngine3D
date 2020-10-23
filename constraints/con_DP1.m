@@ -21,6 +21,7 @@ function results = con_DP1(obj,varargin)
 %     -'nu'
 %     -'phi_r'
 %     -'phi_p'
+%     -'gamma'
 %
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
