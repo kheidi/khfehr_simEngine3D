@@ -16,7 +16,7 @@ for i =1:length(time) - 1
     y_exact(i+1) = (1/t) + (1/t^2)*tan((1/t) + pi - 1);
     
 end
-
+y_exact(1) = 1;
 figure
 hold on
 plot(time,y,'-b','LineWidth',3)
