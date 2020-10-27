@@ -2,11 +2,13 @@ clear
 %% Knowns
 density = 7800;
 L = 2;
-dim_a = 0.05; %square bar
-mass = (density*((dim_a^2)*L))/100;
-g = 9.81;
+dim_a = 4; %square bar
+dim_b = 0.05;
+dim_c = 0.05;
+mass = (density*(dim_a*dim_b*dim_c));
+g = -9.81;
 F = [0;0;mass*g];
-J_bar = getJSymmetric(mass,dim_a);
+J_bar = getJSymmetric(mass,dim_a,dim_b,dim_c);
 
 time = 0:10e-3:10;
 initial = [.7;.1;.7;.1];
@@ -17,24 +19,37 @@ for i = 1:length(time)
     velocity(:,i) = results.q_dot;
     acceleration(:,i) = results.q_ddot;
     initial = locationD(4:7);
-    BB = getBigBlue(results.q, results.phi_q,mass,dim_a);
+    BB = getBigBlue(results.q, results.phi_q,mass,dim_a,dim_b,dim_c);
     G_dot = getG(results.q_dot(4:7));
-    tau_hat(:,i) = 85*G_dot.'*J_bar*G_dot*results.q(4:7);
+    tau_hat(:,i) = 8*G_dot.'*J_bar*G_dot*results.q(4:7);
     P = getP(location(4:7,i));
     M = getM(mass);
     p(:,1) = location(4:7,i);
-    J_p = getJ_p_symm(p,mass,dim_a);
+    J_p = getJ_p_symm(p,mass,dim_a,dim_b,dim_c);
     mat1 = zeros(7,7);
-    mat1(1:3,1:6) = results.phi_r(1:6,:).';
-    mat1(4:7,1:6) = results.phi_p(1:6,:).';
-    mat1(4:7,7) = P.';
+    mat1(1:3,2:7) = results.phi_r(1:6,:).';
+    mat1(4:7,2:7) = results.phi_p(1:6,:).';
+    mat1(4:7,1) = P.';
     mat2 = [
         F-M*results.q_ddot(1:3);
         tau_hat(:,i)-J_p*results.q_ddot(4:7)];
     lambda = mat1\mat2;
+    %lambda(1) = 0;
     reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
-    torque(:,i) = reaction(4:6);
+    G = getG(p);
     
+    for hh = 1:6
+          torques{i}{hh,1} = -1/2*G*results.phi_p(hh,:)'*lambda(hh);
+    end
+                  
+    
+end
+
+torque =zeros(3,length(time));
+
+% Find the torque on the driving constraint
+for i = 1: length(time)
+    torque(:,i) = torques{i}{6,1};
 end
 
 %% Plot Torque
@@ -123,7 +138,5 @@ title('Animation')
 for i = 1:length(location)
     plot(location(2,i),location(3,i),'o') 
     axis([-3 3 -3 3])
-    hold all
-    pause(10e-3)
+    pause(10e-5)
 end
-hold off
