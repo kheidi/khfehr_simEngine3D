@@ -1,4 +1,4 @@
-function results = findInitialConditions(r0, p0, r_dot0, p_dot0, phi_q, physicalProperties)
+function results = findInitialConditions(r0, p0, r_dot0, p_dot0, phi_q, gamma, physicalProperties)
 % Needs:
 %   r0,p0,r_dot0, p_dot0
 
