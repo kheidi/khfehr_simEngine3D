@@ -4,7 +4,6 @@ function [results,location] = simEngine3D_A6P2(T,previous)
 % (pi/4)*cos(2t)
 % Author: K. Heidi Fehr
 % Email: kfehr@wisc.edu
-% October 2020; Last revision: 14-Oct-2020
 %
 % TO-DO: 
 %   -
@@ -205,9 +204,15 @@ function [results,location] = simEngine3D_A6P2(T,previous)
     
     
     results.q_dot = q_dot;
+    results.r_dot = q_dot(1:3,1);
+    results.p_dot = q_dot(4:7,1);
     results.q_ddot = q_ddot;
+    results.r_ddot = q_ddot(1:3,1);
+    results.p_ddot = q_ddot(4:7,1);
     location = rp_next;
     results.q = location;
+    results.p = location(4:7,1);
+    results.r = location(1:3,1);
     results.phi_q = phi_q;
     results.phi_r = phi_q(:,1:3);
     results.phi_p = phi_q(:,4:7);

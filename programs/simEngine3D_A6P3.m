@@ -59,10 +59,10 @@ end
 
 %% Plot Torque
 figure; 
-plot(torque(1,:));
+plot(time,torque(1,:));
 hold on;
-plot(torque(2,:));
-plot(torque(3,:));
+plot(time,torque(2,:));
+plot(time,torque(3,:));
 legend('X','Y','Z');
 
 %% Plot Position of O'
