@@ -78,9 +78,9 @@ function [results,location] = simEngine3D_A6P2(T,previous)
         con6 = con_DP1(data,'phi','phi_r','phi_p','nu');
 
         %%% Euler Param Constraint
-        con7.phi = (data.p_j.'*data.p_j)/2 - 1/2;
+        con7.phi = (data.p_j.'*data.p_j) - 1;
         con7.phi_r = [0;0;0;0;0;0].';
-        con7.phi_p = data.p_j.';
+        con7.phi_p = 2*data.p_j.';
         con7.nu = 0;
         %con7.phi_p = [2;2;2;2;2;2;2;2].';
 
