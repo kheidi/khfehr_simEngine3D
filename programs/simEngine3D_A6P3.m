@@ -1,7 +1,8 @@
 clear
 %% Knowns
+nb = 2;
 density = 7800;
-L = 2;
+L = -2;
 dim_a = 4; %square bar
 dim_b = 0.05;
 dim_c = 0.05;
@@ -26,31 +27,34 @@ for i = 1:length(time)
     M = getM(mass);
     p(:,1) = location(4:7,i);
     J_p = getJ_p_symm(p,mass,dim_a,dim_b,dim_c);
-    mat1 = zeros(7,7);
-    mat1(1:3,2:7) = results.phi_r(1:6,:).';
-    mat1(4:7,2:7) = results.phi_p(1:6,:).';
-    mat1(4:7,1) = P.';
-    mat2 = [
-        F-M*results.q_ddot(1:3);
-        tau_hat(:,i)-J_p*results.q_ddot(4:7)];
+%     mat1 = zeros(7,7);
+%     mat1(1:3,2:7) = results.phi_r(1:6,:).';
+%     mat1(4:7,2:7) = results.phi_p(1:6,:).';
+%     mat1(4:7,1) = P.';
+    mat1 = [results.phi_r',zeros(3*(1),1);...
+                   results.phi_p',p];
+    mat2 = -[
+        M*results.q_ddot(1:3)-F;
+        J_p*results.q_ddot(4:7)-tau_hat(:,i)];
     lambda = mat1\mat2;
-    %lambda(1) = 0;
-    reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
+    lambda = lambda(1:end-nb);
+%     reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
     G = getG(p);
-    
     for hh = 1:6
           torques{i}{hh,1} = -1/2*G*results.phi_p(hh,:)'*lambda(hh);
     end
                   
+%     torque(:,i) =   -(1/2)*getG(p)*results.phi_p.'*lambda;
     
 end
 
 torque =zeros(3,length(time));
-
 % Find the torque on the driving constraint
 for i = 1: length(time)
     torque(:,i) = torques{i}{6,1};
 end
+
+% Plot 
 
 %% Plot Torque
 figure; 
@@ -133,10 +137,10 @@ sgtitle("Velocity of Q")
 
 hold off
 %% Plot Animation
-figure
-title('Animation')
-for i = 1:length(location)
-    plot(location(2,i),location(3,i),'o') 
-    axis([-3 3 -3 3])
-    pause(10e-5)
-end
+% figure
+% title('Animation')
+% for i = 1:length(location)
+%     plot(location(2,i),location(3,i),'o') 
+%     axis([-3 3 -3 3])
+%     pause(10e-5)
+% end

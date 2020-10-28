@@ -1,8 +1,5 @@
 function J_p = getJ_p_symm(p,mass, a, b, c)
-    if nargin < 4
-        b = a;
-        c = a;
-    end
+
     numBodies = length(mass);
     for i = 1:numBodies
         G{i} = getG(p(:,i));

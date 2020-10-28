@@ -1,10 +1,7 @@
 function BB = getBigBlue(q,phi_q,mass,dim_a,dim_b,dim_c)
 
 % TO-DO: Make BB able to adapt to different numbers of bodies.
-    if nargin < 5
-        dim_b = dim_a;
-        dim_c = dim_a;
-    end
+
     
     p = q(4:7,:);
     r = p(1:3,:);
@@ -15,7 +12,7 @@ function BB = getBigBlue(q,phi_q,mass,dim_a,dim_b,dim_c)
     P = getP(p);
     phi_r = phi_q(1:6,1:3);
     phi_p = phi_q(1:6,4:7);
-    J_p = getJ_p_symm(p,mass,dim_a);
+    J_p = getJ_p_symm(p,mass,dim_a,dim_b,dim_c);
     
     BB = zeros(14);
     
