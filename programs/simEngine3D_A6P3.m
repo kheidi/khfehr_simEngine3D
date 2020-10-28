@@ -33,13 +33,14 @@ for i = 1:length(time)
 %     mat1(4:7,1) = P.';
     mat1 = [results.phi_r',zeros(3*(1),1);...
                    results.phi_p',p];
-    mat2 = -[
-        M*results.q_ddot(1:3)-F;
-        J_p*results.q_ddot(4:7)-tau_hat(:,i)];
+    mat2 = [
+        F-M*results.q_ddot(1:3);
+        tau_hat(:,i)-J_p*results.q_ddot(4:7)];
     lambda = mat1\mat2;
-    lambda = lambda(1:end-nb);
-%     reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
+    lambda = lambda(1:end-nb+1);
+    reaction = BB*[results.q_ddot(1:3);results.q_ddot(4:7);lambda];
     G = getG(p);
+    lambda = lambda(1:6);
     for hh = 1:6
           torques{i}{hh,1} = -1/2*G*results.phi_p(hh,:)'*lambda(hh);
     end
