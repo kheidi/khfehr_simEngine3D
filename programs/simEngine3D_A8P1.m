@@ -1,30 +1,24 @@
 % To-Do: Can't get initial conditions to pass requirements
 
+h = 0.001;
+
 %% Set up initial conditions
 
 %Real initial conditions, point O starts rotated 45 degrees (pi/2)
 rotM = [0,0,-1;0,1,0;1,0,0]*RZ(pi/2);
 p = rotM2eulP(rotM);
 
-initialGuess.p_i = [0;0;0;0];%getEParams([0;0;0]);
-initialGuess.p_j = p;
-initialGuess.r_i = [0;0;0];
-initialGuess.r_j = [0;2/(sqrt(2));-2/sqrt(2)];
-initialGuess.p_i_dot = [0;0;0;0]; %gamma
-initialGuess.p_j_dot = [0;0;0;0]; %gamma
-initialGuess.r_j_dot = [0;0;0]; %gamma
+state.p_i = [1;0;0;0];%getEParams([0;0;0]);
+state.p_j = [0.653281458948577;0.270598059802840;0.653281505927862;0.270598040343383];%p;
+state.r_i = [0;0;0];
+state.r_j = [0;2/(sqrt(2));-2/sqrt(2)];
+state.p_i_dot = [0;0;0;0]; %gamma
+state.p_j_dot = [0;0;0;0]; %gamma
+state.r_j_dot = [0;0;0]; %gamma
 
-f = @(t) sin((pi/4)*cos(2*t));
-df = @(t)pi.*sin(t.*2.0).*cos((pi.*cos(t.*2.0))./4.0).*(-1.0./2.0);
-ddf = @(t)pi.^2.*sin(t.*2.0).^2.*sin((pi.*cos(t.*2.0))./4.0).*(-1.0./4.0)-pi.*cos(t.*2.0).*cos((pi.*cos(t.*2.0))./4.0);
-
-initialGuess.f = f(0);
-initialGuess.df = df(0);
-initialGuess.ddf = ddf(0);
-
-allPhi = revJoint_Phi(initialGuess);
+allPhi = revJoint_Phi(state,0);
 phi_q = allPhi.phi_q;
-gamma = revJoint_gamma(initialGuess);
+gamma = revJoint_gamma(state,0);
 
 body.density = 7800;
 body.dim_a = 4; %square bar
@@ -35,7 +29,15 @@ body.mass = (body.density*(body.dim_a*body.dim_b*body.dim_c));
 g = -9.81;
 F = [0;0;body.mass*g];
 
-results = findInitialConditions(initialGuess.r_j, initialGuess.p_j, initialGuess.r_j_dot, initialGuess.p_j_dot, phi_q, gamma, F, body);
+results = findInitialConditions(state.r_j, state.p_j, state.r_j_dot, state.p_j_dot, phi_q, gamma, F, body);
+
+%% Format to send into dynamicsAnalysis
+state.r_ddot = results.r_ddot;
+state.p_ddot = results.p_ddot;
+state.lambda_p = results.lambda_p;
+state.lambda = results.lambda;
+t = 0;
+temp = dynamicsAnalysis(1,body,h,t,state);
 
 
 
