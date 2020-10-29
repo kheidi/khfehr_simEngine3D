@@ -1,6 +1,10 @@
-function phi_q = revJoint_Phi_q(guess)
+function phi = revJoint_Phi(guess)
 
- %% Constraints
+% Needs:
+%   -p_i,p_j,r_i,r_j,d,df,ddf
+
+    L = 2;
+%% Constraints
         %%% Parallel-1
         clear data; data = guess;
         data.a_j_bar = [0;0;1]; %cj bar
@@ -53,7 +57,7 @@ function phi_q = revJoint_Phi_q(guess)
         %%% Build Phi_q / Jacobian
         % We only care about solving for the body j so we will only keep the
         % sections that pertain to it.
-        phi_q = [
+        phi.phi_q = [
             con1.phi_r(4:6),con1.phi_p(5:8);
             con2.phi_r(4:6),con2.phi_p(5:8);
             con3.phi_r(4:6),con3.phi_p(5:8);
@@ -61,5 +65,12 @@ function phi_q = revJoint_Phi_q(guess)
             con5.phi_r(4:6),con5.phi_p(5:8);
             con6.phi_r(4:6),con6.phi_p(5:8);
             con7.phi_r(4:6),con7.phi_p(1:4)];
+        phi.phi_G = [con1.phi;
+            con2.phi;
+            con3.phi;
+            con4.phi;
+            con5.phi;
+            con6.phi;
+            con7.phi];
 
 end
