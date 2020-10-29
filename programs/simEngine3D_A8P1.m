@@ -1,5 +1,5 @@
 % To-Do: Can't get initial conditions to pass requirements
-
+clear
 h = 10e-3;
 
 %% Set up initial conditions
@@ -39,9 +39,16 @@ state.lambda = results.lambda;
 t = 0;
 n{1} = state;
 n{2} = dynamicsAnalysis(1,body,h,t,state);
-t = t+h;
-n{3} = dynamicsAnalysis(2,body,h,t,n{2},n{1});
+i = 3;
+while n{i-1}.t < 10
+    n{i} = dynamicsAnalysis(2,body,h,n{i-1}.t,n{i-1},n{i-2});
+    i = i + 1;
+end
 
+for k = 1:length(n)
+    acceleration(k,:) = n{k}.r_ddot.';
+end
 
-
+figure
+plot(acceleration)
 
