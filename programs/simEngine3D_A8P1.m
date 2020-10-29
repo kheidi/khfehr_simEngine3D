@@ -37,7 +37,8 @@ state.p_ddot = results.p_ddot;
 state.lambda_p = results.lambda_p;
 state.lambda = results.lambda;
 t = 0;
-temp = dynamicsAnalysis(1,body,h,t,state);
+n{1} = state;
+n{2} = dynamicsAnalysis(1,body,h,t,state);
 
 
 

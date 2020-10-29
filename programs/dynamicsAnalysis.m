@@ -1,4 +1,4 @@
-function results = dynamicsAnalysis(orderNum, body, h, t, varargin)
+function next_n = dynamicsAnalysis(orderNum, body, h, t, varargin)
 % varargin: minus1, minus2
 %minus needs to have:
 %r,p,r_dot,p_dot,r_ddot,p_ddot,lambda,lambda.p,phi_r,phi_p
@@ -23,8 +23,9 @@ if orderNum == 1
 end
 
 counter = 1;
+error = 1
 
-while counter < 50
+while error > 1e-3
    
     %%% Stage 1: Position & Velocity
     n.r_j = C_r + beta0^2*h^2*n.r_ddot;
@@ -55,8 +56,42 @@ while counter < 50
     % Find psi
     psi = getBigBlue([n.r_j;n.p_j],newPhi.phi_q,body.mass,body.dim_a,body.dim_b,body.dim_c);
     
-    deltaZ = psi\-g
+    deltaZ = psi\-g;
+    
+    Z = [n.r_ddot;n.p_ddot;n.lambda_p;n.lambda];
+    Z = Z+deltaZ;
+    
+    counter = counter + 1;
+    
+    if counter > 50
+        disp('Did not converge in under 50 iterations, accepting results.')
+        break
+    end
+    
+    n.r_ddot = Z(1:3);
+    n.p_ddot = Z(4:7);
+    n.lambda_p = Z(8);
+    n.lambda = Z(9:14);
+    
+    error = norm(deltaZ);
     
 end
+
+%%% Compute stage 1 again to get final answer
+next_n.r_ddot = n.r_ddot;
+next_n.p_ddot = n.p_ddot;
+next_n.lambda_p = n.lambda_p;
+next_n.lambda = n.lambda;
+
+next_n.r_j = C_r + beta0^2*h^2*next_n.r_ddot;
+next_n.p_j = C_p + beta0^2*h^2*next_n.p_ddot;
+next_n.r_j_dot = C_r_dot + beta0*h*next_n.r_ddot;
+next_n.p_j_dot = C_p_dot + beta0*h*next_n.p_ddot;
+
+% Other variables to keep
+next_n.p_i = n.p_i;
+next_n.r_i = n.r_i;
+next_n.p_i_dot = n.p_i_dot;
+next_n.p_i_dot = n.p_i_dot;
 
 end
