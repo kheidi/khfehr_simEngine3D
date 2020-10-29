@@ -3,7 +3,7 @@
 %% Set up initial conditions
 
 %Real initial conditions, point O starts rotated 45 degrees (pi/2)
-rotM = RY(pi/2)*RZ(pi/2);
+rotM = [0,0,-1;0,1,0;1,0,0]*RZ(pi/2);
 p = rotM2eulP(rotM);
 
 initialGuess.p_i = [0;0;0;0];%getEParams([0;0;0]);
@@ -22,19 +22,20 @@ initialGuess.f = f(0);
 initialGuess.df = df(0);
 initialGuess.ddf = ddf(0);
 
-PHI = revJoint_Phi(initialGuess);
-phi_q = PHI.phi_q;
+allPhi = revJoint_Phi(initialGuess);
+phi_q = allPhi.phi_q;
 gamma = revJoint_gamma(initialGuess);
 
-physicalProperties.mass = (density*(dim_a*dim_b*dim_c));
-physicalProperties.dim_a = 4; %square bar
-physicalProperties.dim_b = 0.05;
-physicalProperties.dim_c = 0.05;
+body.density = 7800;
+body.dim_a = 4; %square bar
+body.dim_b = 0.05;
+body.dim_c = 0.05;
+body.mass = (body.density*(body.dim_a*body.dim_b*body.dim_c));
 
 g = -9.81;
-F = [0;0;mass*g];
+F = [0;0;body.mass*g];
 
-results = findInitialConditions(initialGuess.r_j, initialGuess.p_j, initialGuess.r_j_dot, initialGuess.p_j_dot, phi_q, gamma, F, physicalProperties);
+results = findInitialConditions(initialGuess.r_j, initialGuess.p_j, initialGuess.r_j_dot, initialGuess.p_j_dot, phi_q, gamma, F, body);
 
 
 

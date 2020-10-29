@@ -28,5 +28,7 @@ LHS = getBigBlue(q,phi_q,mass,dim_a,dim_b,dim_c);
 results.full = LHS\RHS;
 results.r_ddot = results.full(1:3);
 results.p_ddot = results.full(4:7);
+results.lambda_p = results.full(8);
+results.lambda = results.full(9:14);
 
 end
