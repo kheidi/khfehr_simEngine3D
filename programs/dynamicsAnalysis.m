@@ -6,12 +6,12 @@ function next_n = dynamicsAnalysis(orderNum, body, h, t, varargin)
 % Based on Lecture17 slide 8 steps
 
 %%% Stage 0: Set up next time step
-n = varargin{1};
 t = t + h;
 M = getM(body.mass);
 
 % Find constants and set BDF coefficients based on order
 if orderNum == 1
+    n = varargin{1};
     % From table:
     beta0 = 1;
     alpha0 = 1;
@@ -20,10 +20,22 @@ if orderNum == 1
     C_p_dot = alpha0*n.p_j_dot;
     C_r = alpha0*n.r_j + beta0*h*alpha0*n.r_j_dot;
     C_p = alpha0*n.p_j + beta0*h*alpha0*n.p_j_dot;
+elseif orderNum == 2
+    n = varargin{1};
+    n2 = varargin{2};
+    beta0 = 2/3;
+    alpha0 = 1;
+    alpha1 = -4/3;
+    alpha2 = 1/3;
+    C_r_dot = -alpha1*n.r_j_dot + -alpha2*n2.r_j_dot;
+    C_p_dot = -alpha1*n.p_j_dot + -alpha2*n2.p_j_dot;
+    C_r = -alpha1*n.r_j + -alpha2*n2.r_j + beta0*h*C_r_dot;
+    C_p = -alpha1*n.p_j + -alpha2*n2.p_j + beta0*h*C_p_dot;
+    
 end
 
 counter = 1;
-error = 1
+error = 1;
 
 while error > 1e-3
    

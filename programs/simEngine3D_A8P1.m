@@ -1,6 +1,6 @@
 % To-Do: Can't get initial conditions to pass requirements
 
-h = 0.001;
+h = 10e-3;
 
 %% Set up initial conditions
 
@@ -39,6 +39,9 @@ state.lambda = results.lambda;
 t = 0;
 n{1} = state;
 n{2} = dynamicsAnalysis(1,body,h,t,state);
+t = t+h;
+n{3} = dynamicsAnalysis(2,body,h,t,n{2},n{1});
+
 
 
 
