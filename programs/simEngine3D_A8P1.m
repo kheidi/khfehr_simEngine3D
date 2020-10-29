@@ -5,7 +5,7 @@ h = 10e-3;
 %% Set up initial conditions
 
 %Real initial conditions, point O starts rotated 45 degrees (pi/2)
-rotM = [0,0,-1;0,1,0;1,0,0]*RZ(pi/2);
+rotM = [0,0,-1;0,1,0;1,0,0]*RZ(sqrt(2)/2);
 p = rotM2eulP(rotM);
 
 state.p_i = [1;0;0;0];%getEParams([0;0;0]);

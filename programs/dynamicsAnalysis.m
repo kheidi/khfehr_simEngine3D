@@ -106,4 +106,6 @@ next_n.r_i = n.r_i;
 next_n.p_i_dot = n.p_i_dot;
 next_n.p_i_dot = n.p_i_dot;
 
+next_n.t = t;
+
 end
