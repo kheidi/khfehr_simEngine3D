@@ -3,32 +3,27 @@ t = 0;
 %% Define bodies
 L = 2;
 %%% Body 1: Ground
-bodyID = 1;
+pointID = 1;
 L1 = 0;
-state(bodyID).p = [1;0;0;0];%getEParams([0;0;0]);
-state(bodyID).r = [0;0;0];
-state(bodyID).p_dot = [0;0;0;0]; %gamma
-
-body(bodyID).L = 0;
-body(bodyID).dim_a = 0;
-body(bodyID).dim_b = 0;
-body(bodyID).dim_c = 0;
-body(bodyID).density = 0;
-body(bodyID).mass = 0;
-state(bodyID).ground = 1;
+state(pointID).p = [1;0;0;0];%getEParams([0;0;0]);
+state(pointID).r = [0;0;0];
+state(pointID).p_dot = [0;0;0;0]; %gamma
+state(pointID).r_dot = [0;0;0];
+state(pointID).ground = 1;
 
 
 %%% Body 2: 
-bodyID = 2;
+pointID = 2;
+bodyID = 1;
 L2 = L;
 R2 = RY(pi/2)*RZ(pi/2);
 p = rotM2eulP(R2);
 
-state(bodyID).p = p;
-state(bodyID).r = [0;2;0];
-state(bodyID).p_dot = [0;0;0;0]; %gamma
-state(bodyID).r_dot = [0;0;0]; %gamma
-state(bodyID).ground = 0;
+state(pointID).p = p;
+state(pointID).r = [0;2;0];
+state(pointID).p_dot = [0;0;0;0]; %gamma
+state(pointID).r_dot = [0;0;0]; %gamma
+state(pointID).ground = 0;
 
 body(bodyID).L = 2;
 body(bodyID).dim_a = 4;
@@ -39,16 +34,17 @@ body(bodyID).mass = (body(bodyID).density*(body(bodyID).dim_a*body(bodyID).dim_b
 
 
 %%% Body 3:
-bodyID = 3;
+pointID = 3;
+bodyID = 2;
 L3 = L/2;
 R3 = RY(pi/2)*RZ(pi/2)*RZ(-pi/2);
 p = rotM2eulP(R3);
 
-state(bodyID).p = p;
-state(bodyID).r = [0;4;-L/2];
-state(bodyID).p_dot = [0;0;0;0]; %gamma
-state(bodyID).r_dot = [0;0;0]; %gamma
-state(bodyID).ground = 0;
+state(pointID).p = p;
+state(pointID).r = [0;4;-L/2];
+state(pointID).p_dot = [0;0;0;0]; %gamma
+state(pointID).r_dot = [0;0;0]; %gamma
+state(pointID).ground = 0;
 
 body(bodyID).L = 1;
 body(bodyID).dim_a = 2;
@@ -71,8 +67,8 @@ joint_1_2.r_j_dot = state(2).r_dot;
 joint_1_2.ground = state(1).ground;
 
 
-PHI_j12 = revJoint_Phi(joint_1_2,L2,t);
-GAMMA_j12 = revJoint_gamma(joint_1_2,L2,t);
+PHI_j12 = free_revJoint_Phi(joint_1_2,L2,t);
+GAMMA_j12 = free_revJoint_gamma(joint_1_2,L2,t);
 
 %%% Second joint, at P
 
@@ -85,5 +81,34 @@ joint_2_3.p_j_dot = state(3).p_dot;
 joint_2_3.r_j_dot = state(3).r_dot;
 joint_2_3.ground = state(2).ground;
 
-PHI_j23 = revJoint_Phi(joint_2_3,L3,t);
-GAMMA_j23 = revJoint_gamma(joint_2_3,L3,t);
+PHI_j23 = free_revJoint_Phi(joint_2_3,L3,t);
+GAMMA_j23 = free_revJoint_gamma(joint_2_3,L3,t);
+
+%% Just start trying things?
+
+% What if I send the p values as columns?
+clear p r p_dot r_dot
+for i = 2:length(state)
+    p(:,i-1) = state(i).p;
+    r(:,i-1) = state(i).r;
+    p_dot(:,i-1) = state(i).p_dot;
+    r_dot(:,i-1) = state(i).r_dot;
+end
+
+for i = 1:length(body)
+    physicalProperties.mass(i) = body(i).mass;
+    physicalProperties.dim_a(i) = body(i).dim_a;
+    physicalProperties.dim_b(i) = body(i).dim_b;
+    physicalProperties.dim_c(i) = body(i).dim_c;
+end
+
+phi_r = [PHI_j12.phi_r,PHI_j23.phi_r];
+phi_p = [PHI_j12.phi_p,PHI_j23.phi_p];
+gamma = [GAMMA_j12;GAMMA_j23];
+F = [0;0;sum(mass)*9.81;0;0;sum(mass)*9.81];
+
+results = findInitialConditions(r, p, r_dot, p_dot, phi_r, phi_p, gamma, F, physicalProperties);
+
+
+
+

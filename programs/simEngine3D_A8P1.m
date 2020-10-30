@@ -30,7 +30,7 @@ body.mass = (body.density*(body.dim_a*body.dim_b*body.dim_c));
 g = -9.81;
 F = [0;0;body.mass*g];
 
-results = findInitialConditions(state.r_j, state.p_j, state.r_j_dot, state.p_j_dot, phi_q, gamma, F, body);
+results = findInitialConditions(state.r_j, state.p_j, state.r_j_dot, state.p_j_dot, allPhi.phi_r, allPhi.phi_p, gamma, F, body);
 
 %% Format to send into dynamicsAnalysis
 state.r_ddot = results.r_ddot;

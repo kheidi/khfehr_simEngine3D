@@ -3,20 +3,6 @@ function gamma = revJoint_gamma(data,L,t)
 % Needs:
 %   -p_i,p_j,r_i,r_j,d,df,ddf, p_i_dot,p_j_dot,r_j_dot
 
-f = @(t) sin((pi/4)*cos(2*t));
-df = @(t)pi.*sin(t.*2.0).*cos((pi.*cos(t.*2.0))./4.0).*(-1.0./2.0);
-ddf = @(t)pi.^2.*sin(t.*2.0).^2.*sin((pi.*cos(t.*2.0))./4.0).*(-1.0./4.0)-pi.*cos(t.*2.0).*cos((pi.*cos(t.*2.0))./4.0);
-
-data.f = f(t);
-data.df = df(t);
-data.ddf = ddf(t);
-
-%%% Driving Constraint
-data.a_i_bar = [0;1;0]; %z axis of G-RF, this is what we want to set the angle with respect to
-data.a_j_bar = [1;0;0];
-con6 = con_DP1(data,'gamma');
-
-
 %%% Parallel-1
 data.a_j_bar = [0;0;1]; %cj bar
 data.a_i_bar = [0;0;1]; %same as ai, Z axis of ground
@@ -49,7 +35,7 @@ con4 = con_CD(data,'gamma');
 data.c = [0;0;1];
 con5 = con_CD(data,'gamma');
 
-con7.gamma = [-2*data.p_j_dot.'*data.p_j_dot];
+con7.gamma = -2*data.p_j_dot.'*data.p_j_dot;
 
 gamma = [
         con1.gamma;
@@ -57,7 +43,6 @@ gamma = [
         con3.gamma;
         con4.gamma;
         con5.gamma;
-        con6.gamma;
         con7.gamma];  
         
 end

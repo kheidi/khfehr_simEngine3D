@@ -3,10 +3,14 @@ function J = getJSymmetric(mass,a,b,c)
 %         b = a;
 %         c = a;
 %     end
-    J = zeros(3);
-    J(1,1) = (1/12)*mass*(b^2 + c^2);
-    J(2,2) = (1/12)*mass*(a^2+c^2);
-    J(3,3) = (1/12)*mass*(a^2+b^2);
-
+nb = length(mass);
+J = zeros(3*nb,3*nb);
+count = 1;
+for i = 1:3:3*nb
+    
+    J(i,i) = (1/12)*mass(count)*(b(count)^2 + c(count)^2);
+    J(i+1,i+1) = (1/12)*mass(count)*(a(count)^2+c(count)^2);
+    J(i+2,i+2) = (1/12)*mass(count)*(a(count)^2+b(count)^2);
+    count = count+1;
     
 end
