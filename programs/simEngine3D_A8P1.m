@@ -1,6 +1,6 @@
 % To-Do: Can't get initial conditions to pass requirements
 clear
-h = 10e-3;
+h = 1e-3;
 L = 2;
 %% Set up initial conditions
 
@@ -15,6 +15,7 @@ state.r_j = [0;(sqrt(2));-sqrt(2)];
 state.p_i_dot = [0;0;0;0]; %gamma
 state.p_j_dot = [0;0;0;0]; %gamma
 state.r_j_dot = [0;0;0]; %gamma
+state.ground = 1;
 
 allPhi = revJoint_Phi(state,L,0);
 phi_q = allPhi.phi_q;

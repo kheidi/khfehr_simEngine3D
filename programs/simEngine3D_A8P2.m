@@ -26,6 +26,7 @@ state(bodyID).p = p;
 state(bodyID).r = [0;2;0];
 state(bodyID).p_dot = [0;0;0;0]; %gamma
 state(bodyID).r_dot = [0;0;0]; %gamma
+state(bodyID).ground = 1;
 
 body(bodyID).L = 2;
 body(bodyID).dim_a = 4;

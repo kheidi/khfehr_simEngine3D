@@ -44,7 +44,7 @@ while error > 1e-3
     n.p_j = C_p + beta0^2*h^2*n.p_ddot;
     n.r_j_dot = C_r_dot + beta0*h*n.r_ddot;
     n.p_j_dot = C_p_dot + beta0*h*n.p_ddot;
-    
+
     % Find new values
     
     newPhi = revJoint_Phi(n,L,t);
@@ -71,8 +71,7 @@ while error > 1e-3
         psi = getBigBlue([n.r_j;n.p_j],newPhi.phi_q,body.mass,body.dim_a,body.dim_b,body.dim_c);
     end
 
-    deltaZ = psi\-g;
-    
+    deltaZ = (psi\-g);
     Z = [n.r_ddot;n.p_ddot;n.lambda_p;n.lambda];
     Z = Z+deltaZ;
     
@@ -83,10 +82,10 @@ while error > 1e-3
         break
     end
     
-    n.r_ddot = Z(1:3);
-    n.p_ddot = Z(4:7);
-    n.lambda_p = Z(8);
-    n.lambda = Z(9:14);
+    n.r_ddot = Z(1:length(n.r_ddot));
+    n.p_ddot = Z(length(n.r_ddot)+1:length(n.r_ddot)+length(n.p_ddot));
+    n.lambda_p = Z(length(n.r_ddot)+length(n.p_ddot)+1:length(n.r_ddot)+length(n.p_ddot)+length(n.lambda_p));
+    n.lambda = Z(length(n.r_ddot)+length(n.p_ddot)+length(n.lambda_p)+1:end);
     
     error = norm(deltaZ);
     
@@ -108,6 +107,7 @@ next_n.p_i = n.p_i;
 next_n.r_i = n.r_i;
 next_n.p_i_dot = n.p_i_dot;
 next_n.p_i_dot = n.p_i_dot;
+next_n.ground = n.ground;
 
 next_n.t = t;
 

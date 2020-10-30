@@ -84,9 +84,12 @@ function results = con_DP1(obj,varargin)
     %Phi_r 
     %Lecture 16, slide 36
     if findPhi_r == true
-        phi_r_i = zeros(1,3);
-        phi_r_j = zeros(1,3);
-        results.phi_r = [phi_r_i,phi_r_j];
+        if obj.ground == 1
+            phi_r_j = zeros(1,3);
+            results.phi_r = phi_r_j;
+        else
+            results.phi_r = zeros(1,6);
+        end
     end
     
     %Phi_p
@@ -105,6 +108,11 @@ function results = con_DP1(obj,varargin)
         phi_p_i = a_j.'*getB(p_i,a_i_bar);
         phi_p_j = a_i.'*getB(p_j,a_j_bar);
         results.phi_p = [phi_p_i,phi_p_j];
+        if obj.ground == 1
+            results.phi_p = phi_p_j;
+        else
+            results.phi_p = [phi_p_i,phi_p_j];
+        end
     end
 
     
