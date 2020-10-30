@@ -57,58 +57,62 @@ con6 = con_DP1(data,'phi','phi_r','phi_p','nu');
 
 %%% Euler Param Constraint
 con7.phi = (data.p_j.'*data.p_j) - 1;
-con7.phi_r = [0;0;0;0;0;0].';
-con7.phi_p = 2*data.p_j.';
+if data.ground == 1
+    con7.phi_r = [0;0;0].';
+    con7.phi_p = data.p_j.';
+else
+    con7.phi_r = [0;0;0;0;0;0].';
+    con7.phi_p = [data.p_i;data.p_j].';
+end
+
 con7.nu = 0;
 %con7.phi_p = [2;2;2;2;2;2;2;2].';
 
 %%% Build Phi_q / Jacobian
 % We only care about solving for the body j so we will only keep the
 % sections that pertain to it.
-if data.ground == 1
-    phi.phi_q = [
-        con1.phi_r(4:6),con1.phi_p(5:8);
-        con2.phi_r(4:6),con2.phi_p(5:8);
-        con3.phi_r(4:6),con3.phi_p(5:8);
-        con4.phi_r(4:6),con4.phi_p(5:8);
-        con5.phi_r(4:6),con5.phi_p(5:8);
-        con6.phi_r(4:6),con6.phi_p(5:8);
-        con7.phi_r(4:6),con7.phi_p(1:4)];
-    phi.phi_G = [con1.phi;
-        con2.phi;
-        con3.phi;
-        con4.phi;
-        con5.phi;
-        con6.phi;
-        con7.phi];
-    phi.phi_param = con7.phi;
-    phi.phi = phi.phi_G(1:6);
-    phi.phi_r = [
-        con1.phi_r(4:6);
-        con2.phi_r(4:6);
-        con3.phi_r(4:6);
-        con4.phi_r(4:6);
-        con5.phi_r(4:6);
-        con6.phi_r(4:6)];
-    phi.phi_p = [
-        con1.phi_p(5:8);
-        con2.phi_p(5:8);
-        con3.phi_p(5:8);
-        con4.phi_p(5:8);
-        con5.phi_p(5:8);
-        con6.phi_p(5:8)];
+phi.phi_q = [
+    con1.phi_r,con1.phi_p;
+    con2.phi_r,con2.phi_p;
+    con3.phi_r,con3.phi_p;
+    con4.phi_r,con4.phi_p;
+    con5.phi_r,con5.phi_p;
+    con6.phi_r,con6.phi_p;
+    con7.phi_r,con7.phi_p];
+phi.phi_G = [con1.phi;
+    con2.phi;
+    con3.phi;
+    con4.phi;
+    con5.phi;
+    con6.phi;
+    con7.phi];
+phi.phi_param = con7.phi;
+phi.phi = phi.phi_G(1:6);
+phi.phi_r = [
+    con1.phi_r;
+    con2.phi_r;
+    con3.phi_r;
+    con4.phi_r;
+    con5.phi_r;
+    con6.phi_r];
+phi.phi_p = [
+    con1.phi_p;
+    con2.phi_p;
+    con3.phi_p;
+    con4.phi_p;
+    con5.phi_p;
+    con6.phi_p];
 
-    %%% Find q_dot
-    nu_array = [
-        con1.nu;
-        con2.nu;
-        con3.nu;
-        con4.nu;
-        con5.nu;
-        con6.nu;
-        con7.nu];
-    phi.q_dot = inv(phi.phi_q)*nu_array;
-end
+%%% Find q_dot
+nu_array = [
+    con1.nu;
+    con2.nu;
+    con3.nu;
+    con4.nu;
+    con5.nu;
+    con6.nu;
+    con7.nu];
+%phi.q_dot = inv(phi.phi_q)*nu_array;
 
 
 end
