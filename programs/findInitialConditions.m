@@ -10,7 +10,7 @@ dim_c = physicalProperties.dim_c;
 
 %%% Right Hand Side
 
-G_dot = getG(p0);
+G_dot = getG(p_dot0);
 J_bar = getJSymmetric(mass,dim_a,dim_b,dim_c);
 tau_hat = 8*G_dot.'*J_bar*G_dot*p0;
 gamma_p = gamma(end); %euler param gamma

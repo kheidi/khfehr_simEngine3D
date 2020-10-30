@@ -1,4 +1,4 @@
-function next_n = dynamicsAnalysis(orderNum, body, h, t, varargin)
+function next_n = dynamicsAnalysis(orderNum, body, h, t,L,varargin)
 % varargin: minus1, minus2
 %minus needs to have:
 %r,p,r_dot,p_dot,r_ddot,p_ddot,lambda,lambda.p,phi_r,phi_p
@@ -46,10 +46,11 @@ while error > 1e-3
     n.p_j_dot = C_p_dot + beta0*h*n.p_ddot;
     
     % Find new values
-    newPhi = revJoint_Phi(n,t);
+    
+    newPhi = revJoint_Phi(n,L,t);
     n.phi_r = newPhi.phi_r;
     n.phi_p = newPhi.phi_p;
-    newGamma = revJoint_gamma(n,t);
+    newGamma = revJoint_gamma(n,L,t);
     newJp = getJ_p_symm(n.p_j,body.mass,body.dim_a,body.dim_b,body.dim_c);
     newP = getP(n.p_j);
     newF = [0;0;body.mass*-9.81];
@@ -66,8 +67,10 @@ while error > 1e-3
         (1/(beta0^2*h^2))*n.phi];
     
     % Find psi
-    psi = getBigBlue([n.r_j;n.p_j],newPhi.phi_q,body.mass,body.dim_a,body.dim_b,body.dim_c);
-    
+    if counter == 1
+        psi = getBigBlue([n.r_j;n.p_j],newPhi.phi_q,body.mass,body.dim_a,body.dim_b,body.dim_c);
+    end
+
     deltaZ = psi\-g;
     
     Z = [n.r_ddot;n.p_ddot;n.lambda_p;n.lambda];
@@ -75,7 +78,7 @@ while error > 1e-3
     
     counter = counter + 1;
     
-    if counter > 50
+    if counter > 10
         disp('Did not converge in under 50 iterations, accepting results.')
         break
     end

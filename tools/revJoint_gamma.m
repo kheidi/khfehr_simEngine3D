@@ -1,4 +1,4 @@
-function gamma = revJoint_gamma(data,t)
+function gamma = revJoint_gamma(data,L,t)
 
 % Needs:
 %   -p_i,p_j,r_i,r_j,d,df,ddf, p_i_dot,p_j_dot,r_j_dot
@@ -10,7 +10,6 @@ ddf = @(t)pi.^2.*sin(t.*2.0).^2.*sin((pi.*cos(t.*2.0))./4.0).*(-1.0./4.0)-pi.*co
 data.f = f(t);
 data.df = df(t);
 data.ddf = ddf(t);
-L = 2;
 
 %%% Driving Constraint
 data.a_i_bar = [0;1;0]; %z axis of G-RF, this is what we want to set the angle with respect to

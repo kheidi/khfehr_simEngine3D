@@ -1,4 +1,4 @@
-function phi = revJoint_Phi(guess,t)
+function phi = revJoint_Phi(guess,L,t)
 
 % Needs:
 %   -p_i,p_j,r_i,r_j,d,df,ddf
@@ -11,7 +11,7 @@ guess.f = f(t);
 guess.df = df(t);
 guess.ddf = ddf(t);
 
-L = 2;
+
 %% Constraints
 %%% Parallel-1
 clear data; data = guess;

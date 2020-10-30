@@ -1,4 +1,3 @@
-clear
 %% Knowns
 nb = 2;
 density = 7800;
