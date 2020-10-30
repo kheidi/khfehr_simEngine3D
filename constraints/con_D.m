@@ -112,7 +112,11 @@ function results = con_D(obj,varargin)
         dij = getdij(r_i,r_j,s_i_P,s_j_Q);
         phi_r_i = -dij;
         phi_r_j = dij;
-        results.phi_r = [phi_r_i,phi_r_j];
+        if obj.ground == 1
+            results.phi_r = phi_r_j;
+        else
+            results.phi_r = [phi_r_i,phi_r_j];
+        end
     end
     
     %Phi_p
@@ -133,7 +137,11 @@ function results = con_D(obj,varargin)
         dij = getdij(r_i,r_j,s_i_P,s_j_Q);
         phi_p_i = -getB(p_i,s_i_P_bar).'*dij;
         phi_p_j = getB(p_j,s_j_P_bar).'*dij;
-        results.phi_p = [phi_p_i,phi_p_j];
+        if obj.ground == 1
+            results.phi_p = phi_p_j;
+        else
+            results.phi_p = [phi_p_i,phi_p_j];
+        end
  
     end
 

@@ -90,7 +90,11 @@ function results = con_CD(obj,varargin)
         %Actual Calculations
         phi_r_i = -c.';
         phi_r_j = c.';
-        results.phi_r = [phi_r_i,phi_r_j];
+        if obj.ground == 1
+            results.phi_r = phi_r_j;
+        else
+            results.phi_r = [phi_r_i,phi_r_j];
+        end
 
     end
     
@@ -106,7 +110,12 @@ function results = con_CD(obj,varargin)
         %Actual Calculations
         phi_p_i = -c.'*getB(p_i,s_i_P_bar);
         phi_p_j = c.'*getB(p_j,s_j_P_bar);
-        results.phi_p = [phi_p_i,phi_p_j];
+        if obj.ground == 1
+            results.phi_p = phi_p_j;
+        else
+            results.phi_p = [phi_p_i,phi_p_j];
+        end
+            
 
     end
     

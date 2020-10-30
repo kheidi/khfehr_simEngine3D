@@ -115,7 +115,11 @@ function results = con_DP2(obj,varargin)
         a_i = A_i*a_i_bar;
         phi_r_i = -(a_i);
         phi_r_j = a_i;
-        results.phi_r = [phi_r_i,phi_r_j];
+        if obj.ground == 1
+            results.phi_r = phi_r_j;
+        else
+            results.phi_r = [phi_r_i,phi_r_j];
+        end
     end
 
     
@@ -139,7 +143,11 @@ function results = con_DP2(obj,varargin)
         dij = getdij(r_i,r_j,s_i_P,s_j_Q);
         phi_p_i = getB(p_i,a_i_bar).'*dij - getB(p_i,s_i_P_bar).'*a_i;
         phi_p_j = getB(p_j,s_i_P_bar).'*a_i;
-        results.phi_p = [phi_p_i,phi_p_j];
+        if obj.ground == 1
+            results.phi_p = phi_p_j;
+        else
+            results.phi_p = [phi_p_i,phi_p_j];
+        end
  
     end
 
