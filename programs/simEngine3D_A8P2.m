@@ -86,7 +86,6 @@ GAMMA_j23 = free_revJoint_gamma(joint_2_3,L3,t);
 
 %% Just start trying things?
 
-% What if I send the p values as columns?
 clear p r p_dot r_dot
 for i = 2:length(state)
     p(:,i-1) = state(i).p;
@@ -94,6 +93,10 @@ for i = 2:length(state)
     p_dot(:,i-1) = state(i).p_dot;
     r_dot(:,i-1) = state(i).r_dot;
 end
+p = [state(2).p;state(3).p];
+r = [state(2).r;state(3).r];
+p_dot = [state(2).p_dot;state(3).p_dot];
+r_dot = [state(2).r_dot;state(3).r_dot];
 
 for i = 1:length(body)
     physicalProperties.mass(i) = body(i).mass;

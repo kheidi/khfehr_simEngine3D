@@ -1,6 +1,9 @@
 function J_p = getJ_p_symm(p,mass, a, b, c)
 
     numBodies = length(mass);
+    % Unstack p
+    
+    p = reshape(p,[4,length(p)/4]);
     for i = 1:numBodies
         G{i} = getG(p(:,i));
         J{i} = getJSymmetric(mass(i),a,b,c);
