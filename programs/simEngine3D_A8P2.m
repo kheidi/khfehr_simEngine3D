@@ -9,7 +9,9 @@ state(pointID).p = [1;0;0;0];%getEParams([0;0;0]);
 state(pointID).r = [0;0;0];
 state(pointID).p_dot = [0;0;0;0]; %gamma
 state(pointID).r_dot = [0;0;0];
-state(pointID).ground = 1;
+state(pointID).ground = 0;
+state(pointID).pointAbar = [0,0,0]; 
+state(pointID).pointBbar = [0,0,0];
 
 
 %%% Body 2: 
@@ -24,6 +26,8 @@ state(pointID).r = [0;2;0];
 state(pointID).p_dot = [0;0;0;0]; %gamma
 state(pointID).r_dot = [0;0;0]; %gamma
 state(pointID).ground = 0;
+state(pointID).pointAbar = [-2,0,0]; 
+state(pointID).pointBbar = [2,0,0];
 
 body(bodyID).L = 2;
 body(bodyID).dim_a = 4;
@@ -45,6 +49,8 @@ state(pointID).r = [0;4;-L/2];
 state(pointID).p_dot = [0;0;0;0]; %gamma
 state(pointID).r_dot = [0;0;0]; %gamma
 state(pointID).ground = 0;
+state(pointID).pointAbar = [-1,0,0]; 
+state(pointID).pointBbar = [1,0,0];
 
 body(bodyID).L = 1;
 body(bodyID).dim_a = 2;
@@ -108,11 +114,12 @@ end
 phi_r = [PHI_j12.phi_r;PHI_j23.phi_r];
 phi_p = [PHI_j12.phi_p;PHI_j23.phi_p];
 gamma = [GAMMA_j12;GAMMA_j23];
-F = [0;0;sum(mass)*9.81;0;0;sum(mass)*9.81];
+F = [0;0;sum(physicalProperties.mass)*9.81;0;0;sum(physicalProperties.mass)*9.81];
 
-phi_q = buildCons.buildPhi_q(PHI_j12,PHI_j23);
-phi_r = phi_q(:,1:3);
-phi_p = phi_q(:,4:7);
+phi_qtemp = buildCons.buildPhi_q(PHI_j12,PHI_j23);
+phi_qtemp = [PHI_j12.phi_q(1:5,:);PHI_j23.phi_q(1:5,:)]
+phi_r = phi_qtemp(:,1:6);
+phi_p = phi_qtemp(:,7:14);
 
 results = findInitialConditions(r, p, r_dot, p_dot, phi_r, phi_p, gamma, F, physicalProperties);
 
