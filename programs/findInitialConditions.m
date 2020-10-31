@@ -36,9 +36,9 @@ LHS = [
 %%% Solve for acceleration & lambdas
 
 results.full = LHS\RHS;
-results.r_ddot = results.full(1:3);
-results.p_ddot = results.full(4:7);
-results.lambda_p = results.full(8);
-results.lambda = results.full(9:14);
+results.r_ddot = results.full(1:3*nb);
+results.p_ddot = results.full(3*nb+1:3*nb+4*nb);
+results.lambda_p = results.full(3*nb+4*nb+1:3*nb+4*nb+nb);
+results.lambda = results.full(3*nb+4*nb+nb+1:end);
 
 end

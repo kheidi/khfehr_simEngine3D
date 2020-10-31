@@ -104,7 +104,7 @@ phi.phi_p = [
     con6.phi_p];
 
 %%% Find q_dot
-nu_array = [
+phi.nu_array = [
     con1.nu;
     con2.nu;
     con3.nu;
@@ -112,7 +112,7 @@ nu_array = [
     con5.nu;
     con6.nu;
     con7.nu];
-phi.q_dot = inv(phi.phi_q)*nu_array;
+phi.q_dot = inv(phi.phi_q)*phi.nu_array;
 
 
 end
