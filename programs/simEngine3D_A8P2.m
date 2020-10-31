@@ -105,10 +105,14 @@ for i = 1:length(body)
     physicalProperties.dim_c(i) = body(i).dim_c;
 end
 
-phi_r = [PHI_j12.phi_r,PHI_j23.phi_r];
-phi_p = [PHI_j12.phi_p,PHI_j23.phi_p];
+phi_r = [PHI_j12.phi_r;PHI_j23.phi_r];
+phi_p = [PHI_j12.phi_p;PHI_j23.phi_p];
 gamma = [GAMMA_j12;GAMMA_j23];
 F = [0;0;sum(mass)*9.81;0;0;sum(mass)*9.81];
+
+phi_q = buildCons.buildPhi_q(PHI_j12,PHI_j23);
+phi_r = phi_q(:,1:3);
+phi_p = phi_q(:,4:7);
 
 results = findInitialConditions(r, p, r_dot, p_dot, phi_r, phi_p, gamma, F, physicalProperties);
 
