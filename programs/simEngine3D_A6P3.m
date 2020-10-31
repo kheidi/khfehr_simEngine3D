@@ -1,5 +1,5 @@
 %% Knowns
-nb = 2;
+nb = 2;                   
 density = 7800;
 L = -2;
 dim_a = 4; %square bar

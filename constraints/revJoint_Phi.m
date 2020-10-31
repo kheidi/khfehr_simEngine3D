@@ -112,7 +112,7 @@ nu_array = [
     con5.nu;
     con6.nu;
     con7.nu];
-%phi.q_dot = inv(phi.phi_q)*nu_array;
+phi.q_dot = inv(phi.phi_q)*nu_array;
 
 
 end

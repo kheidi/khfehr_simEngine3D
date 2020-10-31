@@ -28,6 +28,8 @@ function [results,location] = simEngine3D_A6P2(T,previous)
     guess.df = df(T);
     guess.ddf = ddf(T);
     
+    guess.ground = 1;
+    
     error = 100;
     i =0;
     while error>1e-5
@@ -81,6 +83,7 @@ function [results,location] = simEngine3D_A6P2(T,previous)
         con7.phi_r = [0;0;0;0;0;0].';
         con7.phi_p = 2*data.p_j.';
         con7.nu = 0;
+        
         %con7.phi_p = [2;2;2;2;2;2;2;2].';
 
         %% Calculations for Newton Rhapson
@@ -92,13 +95,13 @@ function [results,location] = simEngine3D_A6P2(T,previous)
         % We only care about solving for the body j so we will only keep the
         % sections that pertain to it.
         phi_q = [
-            con1.phi_r(4:6),con1.phi_p(5:8);
-            con2.phi_r(4:6),con2.phi_p(5:8);
-            con3.phi_r(4:6),con3.phi_p(5:8);
-            con4.phi_r(4:6),con4.phi_p(5:8);
-            con5.phi_r(4:6),con5.phi_p(5:8);
-            con6.phi_r(4:6),con6.phi_p(5:8);
-            con7.phi_r(4:6),con7.phi_p(1:4)];
+            con1.phi_r,con1.phi_p;
+            con2.phi_r,con2.phi_p;
+            con3.phi_r,con3.phi_p;
+            con4.phi_r,con4.phi_p;
+            con5.phi_r,con5.phi_p;
+            con6.phi_r,con6.phi_p;
+            con7.phi_r,con7.phi_p];
 
         %%% phi_Q
         % This is the collection of all phi values

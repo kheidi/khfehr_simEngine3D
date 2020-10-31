@@ -39,7 +39,7 @@ state.lambda_p = results.lambda_p;
 state.lambda = results.lambda;
 t = 0;
 n{1} = state;
-n{2} = dynamicsAnalysis(1,body,h,t,L,state);
+     n{2} = dynamicsAnalysis(1,body,h,t,L,state);
 i = 3;
 while n{i-1}.t < 10
     n{i} = dynamicsAnalysis(2,body,h,n{i-1}.t,L,n{i-1},n{i-2});
