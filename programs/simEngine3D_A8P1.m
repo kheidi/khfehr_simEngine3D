@@ -20,6 +20,8 @@ state.ground = 1;
 allPhi = revJoint_Phi(state,L,0);
 phi_q = allPhi.phi_q;
 gamma = revJoint_gamma(state,L,0);
+state.nu = allPhi.nu_array;
+state.phi_q = allPhi.phi_q;
 
 body.density = 7800;
 body.dim_a = 4; %square bar
@@ -41,12 +43,24 @@ state.lambda = results.lambda;
 t = 0;
 state.t = t;
 n{1} = state;
-     n{2} = dynamicsAnalysis(1,body,h,t,L,state);
+n{2} = dynamicsAnalysis(1,body,h,t,L,state);
 i = 3;
 while n{i-1}.t < 10
     n{i} = dynamicsAnalysis(2,body,h,n{i-1}.t,L,n{i-1},n{i-2});
     i = i + 1;
 end
+
+%% Find velocity violations
+
+for i = 1:length(n)
+    nu = n{1,i}.nu;
+    phi_r = n{1,i}.phi_q(:,1:3);
+    phi_p = n{1,i}.phi_q(:,4:7);
+    nu_hat  = phi_r*n{1,i}.r_j_dot + phi_p*n{1,i}.p_j_dot;
+    violation(:,i) = norm(nu_hat - nu);
+end
+
+
 
 %% Find final positions and torques
 
@@ -60,13 +74,17 @@ for i = 1:length(n)
 
 end
 
+
+
 %% Plot Torque
 figure; 
 plot(time,torque(:,1));
 hold on;
 plot(time,torque(:,2));
 plot(time,torque(:,3));
+xlabel('Time (s)')
 legend('X','Y','Z');
+title('Reaction Torque')
 
 %% Plot Position of O'
 
@@ -76,18 +94,21 @@ subplot(3,1,1);
 x = time;
 y1 = location(:,1);
 plot(x,y1)
+xlabel('Time (s)')
 title('X Position')
 
 subplot(3,1,2);
 x = time;
 y2 = location(:,2);
 plot(x,y2)
+xlabel('Time (s)')
 title('Y Position')
 
 subplot(3,1,3);
 x = time;
 y3 = location(:,3);
 plot(x,y3)
+xlabel('Time (s)')
 title('Z Position')
 
 %% Plot Velocity
@@ -95,6 +116,7 @@ figure;
 hold on;
 plot(time,velocity(:,2));
 plot(time,velocity(:,3));
+xlabel('Time (s)')
 legend('Vel in Y', 'Vel in Z');
 sgtitle("Velocity of O'")
 hold off
@@ -105,5 +127,15 @@ hold on;
 plot(time,acceleration(:,2));
 plot(time,acceleration(:,3));
 legend('Acc in Y', 'Acc in Z');
+xlabel('Time (s)')
 sgtitle("Acceleration of O'")
+hold off
+
+%% Plot Violation
+figure;
+hold on;
+plot(time,violation);
+sgtitle("Velocity Violations over Time")
+xlabel('Time (s)')
+ylabel('Velocity Violations')
 hold off
