@@ -140,7 +140,7 @@ function results = con_D(obj,varargin)
         if obj.ground == 1
             results.phi_p = phi_p_j;
         else
-            results.phi_p = [phi_p_i;phi_p_j];
+            results.phi_p = [phi_p_i,phi_p_j];
         end
  
     end

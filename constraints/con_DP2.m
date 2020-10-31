@@ -118,7 +118,7 @@ function results = con_DP2(obj,varargin)
         if obj.ground == 1
             results.phi_r = phi_r_j;
         else
-            results.phi_r = [phi_r_i;phi_r_j];
+            results.phi_r = [phi_r_i,phi_r_j];
         end
     end
 

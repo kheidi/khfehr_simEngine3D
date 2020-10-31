@@ -93,7 +93,7 @@ function results = con_CD(obj,varargin)
         if obj.ground == 1
             results.phi_r = phi_r_j;
         else
-            results.phi_r = [phi_r_i;phi_r_j];
+            results.phi_r = [phi_r_i,phi_r_j];
         end
 
     end
@@ -113,7 +113,7 @@ function results = con_CD(obj,varargin)
         if obj.ground == 1
             results.phi_p = phi_p_j;
         else
-            results.phi_p = [phi_p_i;phi_p_j];
+            results.phi_p = [phi_p_i,phi_p_j];
         end
             
 

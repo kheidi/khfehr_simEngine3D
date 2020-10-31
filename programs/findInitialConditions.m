@@ -8,15 +8,15 @@ dim_b = physicalProperties.dim_b;
 dim_c = physicalProperties.dim_c;
 
 nb = length(mass);
-nc = length(gamma) - 1;
+nc = length(phi_p);
 
 %%% Right Hand Side
 
 G_dot = getG(p_dot0);
 J_bar = getJSymmetric(mass,dim_a,dim_b,dim_c);
 tau_hat = 8*G_dot.'*J_bar*G_dot*p0;
-gamma_p = gamma(end); %euler param gamma
-gamma_hat = gamma(1:end-1);
+gamma_p = gamma(end-nb+1:end); %euler param gamma
+gamma_hat = gamma(1:end-nb);
 
 RHS = [F;tau_hat;gamma_p;gamma_hat];
 

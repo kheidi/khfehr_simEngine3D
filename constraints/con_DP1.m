@@ -88,7 +88,7 @@ function results = con_DP1(obj,varargin)
             phi_r_j = zeros(1,3);
             results.phi_r = phi_r_j;
         else
-            results.phi_r = zeros(2,3);
+            results.phi_r = zeros(1,6);
         end
     end
     
@@ -111,7 +111,7 @@ function results = con_DP1(obj,varargin)
         if obj.ground == 1
             results.phi_p = phi_p_j;
         else
-            results.phi_p = [phi_p_i;phi_p_j];
+            results.phi_p = [phi_p_i,phi_p_j];
         end
     end
 

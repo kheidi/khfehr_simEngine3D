@@ -44,8 +44,8 @@ if data.ground == 1
     con7.phi_r = [0;0;0].';
     con7.phi_p = data.p_j.';
 else
-    con7.phi_r = [0,0,0;0,0,0];
-    con7.phi_p = [data.p_i.';data.p_j.'];
+    con7.phi_r = [0,0,0,0,0,0];
+    con7.phi_p = [data.p_i.',data.p_j.'];
 end
 
 con7.nu = 0;
