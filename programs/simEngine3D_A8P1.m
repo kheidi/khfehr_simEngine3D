@@ -26,6 +26,7 @@ body.dim_a = 4; %square bar
 body.dim_b = 0.05;
 body.dim_c = 0.05;
 body.mass = (body.density*(body.dim_a*body.dim_b*body.dim_c));
+body.L = L;
 
 g = -9.81;
 F = [0;0;body.mass*g];
@@ -38,6 +39,7 @@ state.p_ddot = results.p_ddot;
 state.lambda_p = results.lambda_p;
 state.lambda = results.lambda;
 t = 0;
+state.t = t;
 n{1} = state;
      n{2} = dynamicsAnalysis(1,body,h,t,L,state);
 i = 3;
@@ -46,10 +48,62 @@ while n{i-1}.t < 10
     i = i + 1;
 end
 
-for k = 1:length(n)
-    acceleration(k,:) = n{k}.r_ddot.';
+%% Find final positions and torques
+
+for i = 1:length(n)
+    final{i} = finalResults_j(n{i},body,F);
+    time(i,1) = n{i}.t;
+    torque(i,:) = final{i}.torque;
+    location(i,:) = final{i}.location;
+    velocity(i,:) = final{i}.velocity;
+    acceleration(i,:) = final{i}.acceleration;
+
 end
 
-figure
-plot(acceleration)
+%% Plot Torque
+figure; 
+plot(time,torque(:,1));
+hold on;
+plot(time,torque(:,2));
+plot(time,torque(:,3));
+legend('X','Y','Z');
 
+%% Plot Position of O'
+
+figure;
+sgtitle("Plot Position of O'");
+subplot(3,1,1);
+x = time;
+y1 = location(:,1);
+plot(x,y1)
+title('X Position')
+
+subplot(3,1,2);
+x = time;
+y2 = location(:,2);
+plot(x,y2)
+title('Y Position')
+
+subplot(3,1,3);
+x = time;
+y3 = location(:,3);
+plot(x,y3)
+title('Z Position')
+
+%% Plot Velocity
+figure;
+hold on;
+plot(time,velocity(:,2));
+plot(time,velocity(:,3));
+legend('Vel in Y', 'Vel in Z');
+sgtitle("Velocity of O'")
+hold off
+
+%% Plot Acceleration
+figure;
+hold on;
+plot(time,acceleration(:,2));
+plot(time,acceleration(:,3));
+legend('Acc in Y', 'Acc in Z');
+sgtitle("Acceleration of O'")
+hold off
