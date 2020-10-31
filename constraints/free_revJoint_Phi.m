@@ -24,8 +24,8 @@ con2 = con_DP1(data,'phi','phi_r','phi_p','nu');
 %%% Spherical
 clear data; data = guess;
 data.r_i = [0;0;0];
-data.s_i_P_bar = [0;0;0]; %also s_i_P since A = I
-data.s_j_P_bar = [-L;0;0];
+data.s_i_P_bar = guess.pointBbar_i; %also s_i_P since A = I
+data.s_j_P_bar = guess.pointAbar_j;
 data.f = 0;
 data.df = 0;
 data.ddf = 0;
