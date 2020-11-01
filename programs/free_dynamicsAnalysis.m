@@ -53,7 +53,13 @@ while error > 1e-3
     sep1.pointBbar_i = [0;0;0];
     sep1.pointAbar_j = [-2;0;0];
     sep1.ground = 1;
+    sep1.p_i = n.p_i;
+    sep1.p_i_dot = n.p_i_dot;
+    sep1.p_j_dot = n.p_j_dot(1:4);
+    sep1.r_i_dot = n.r_i_dot;
+    sep1.r_j_dot = n.r_j_dot(1:3);
     phi1 = free_revJoint_Phi(sep1,L,t);
+    gamma1 = free_revJoint_gamma(sep1,L,t);
     
 
     sep2.p_i = n.p_i(1:4);
@@ -63,19 +69,24 @@ while error > 1e-3
     sep2.pointBbar_i = [2;0;0];
     sep2.pointAbar_j = [-1;0;0]; 
     sep2.ground = 0;
+    sep2.p_i_dot = n.p_j_dot(1:4);
+    sep2.p_j_dot = n.p_j_dot(5:8);
+    sep2.r_i_dot = n.r_j_dot(1:3);
+    sep2.r_j_dot = n.r_j_dot(4:6);
     phi2 = free_revJoint_Phi(sep2,L,t);
+    gamma2 = free_revJoint_gamma(sep2,L,t);
     
 %     newPhi = free_revJoint_Phi(n,L,t);
-    phi_q = [phi1.phi_q(1:5,:);phi2.phi_q(1:5,:)]
+    phi_q = [phi1.phi_q(1:5,:), zeros(5,7);phi2.phi_q(1:5,:)];
     n.phi_r = phi_q(:,1:6);
     n.phi_p = phi_q(:,7:14);
-    newGamma = free_revJoint_gamma(n,L,t);
+    newGamma = [gamma1;gamma2];
     newJp = getJ_p_symm(n.p_j,body.mass,body.dim_a,body.dim_b,body.dim_c);
     newP = getP(n.p_j);
-    newF = [0;0;body.mass*-9.81];
+    newF = [0;0;body.mass(1)*-9.81;0;0;body.mass(2)*-9.81];
     newTauHat = getTauHat(n.p_j,n.p_j_dot,body);
-    n.phi_param = newPhi.phi_param;
-    n.phi = newPhi.phi;
+    n.phi_param = [phi1.phi_q(6:6,:),zeros(1,7);phi2.phi_q(6:6,:)];
+    n.phi = [phi1.phi;phi2.phi];
 
     %%% Stage 2: Find residual
 
