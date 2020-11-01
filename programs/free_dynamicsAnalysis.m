@@ -85,7 +85,7 @@ while error > 1e-3
     newP = getP(n.p_j);
     newF = [0;0;body.mass(1)*-9.81;0;0;body.mass(2)*-9.81];
     newTauHat = getTauHat(n.p_j,n.p_j_dot,body);
-    n.phi_param = [phi1.phi_q(6:6,:),zeros(1,7);phi2.phi_q(6:6,:)];
+    n.phi_param = [phi1.phi_q(6:6,4:7);phi2.phi_q(6:6,4:7)];
     n.phi = [phi1.phi;phi2.phi];
 
     %%% Stage 2: Find residual
@@ -94,7 +94,7 @@ while error > 1e-3
         M*n.r_ddot + n.phi_r.'*n.lambda - newF;
         newJp*n.p_ddot + n.phi_p.'*n.lambda + newP.'*n.lambda_p - newTauHat;
         (1/(beta0^2*h^2))*n.phi_param;
-        (1/(beta0^2*h^2))*n.phi];
+        (1/(beta0^2*h^2))*n.phi.'];
     
     % Find psi
     if counter == 1
