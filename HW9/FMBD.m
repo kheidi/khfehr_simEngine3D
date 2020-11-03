@@ -1,17 +1,26 @@
 %% Vibrating Cantilevered Beam
 % Author: K. Heidi Fehr
 
+%% Knowns
 globalZero = [0;0;0]; % Center of beam, (u,v,w)
 L = 0.5; %m
 H = 0.003; %m
 W = 0.003; %m
+g = [0;0;-9.81]; %m/s
+E = 2e11; %Pa
+rho = 7700; % density, kg/m^3
+nu = 0.3; %poissons ratio
+k1 = 10*((1+nu)/(12+11*nu));
+k2 = k1;
+
+%% Initial calculations
 r1 = [-0.25;0;0]; %r(j)
 r2 = [0.25;0;0]; %r(j+1)
 
 % For node 1:
-xi = (2*ri(1))/L; %slide 21-26
-eta = (2*ri(2))/W;
-zeta = (2*ri(3))/H;
+xi = (2*r1(1))/L; %slide 21-26
+eta = (2*r1(2))/W;
+zeta = (2*r1(3))/H;
 
 %% Part a) Shape function in normalized coordinates
 
