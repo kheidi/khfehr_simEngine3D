@@ -169,13 +169,13 @@ Sym_xiZeta_all = diff(Sym_xi_all,zeta);
 
 %%% Matrix to be normalized:
 J0 = [Sym_xiXi_all*e0, Sym_xiEta_all*e0, Sym_xiZeta_all*e0];
-N = det(J0);
+detJ = det(J0);
 %%% Expression to integrate:
 % limits
 % rho = 1;
 a = -1;
 b = 1;
-f = rho*(Sym_xi_all.')*Sym_xi_all*N;
+f = rho*(Sym_xi_all.')*Sym_xi_all*detJ;
 % integrals
 M = int(f,zeta,a,b);
 M = int(M,eta,a,b);
@@ -185,7 +185,7 @@ M = int(M,xi,a,b);
 
 % Function slide 21-35
 F_grav = g;
-f = rho*(Sym_xi_all.')*F_grav*N;
+f = rho*(Sym_xi_all.')*F_grav*detJ;
 a = -1;
 b = 1;
 % integrals
@@ -203,10 +203,21 @@ r = Sym_xi_all*e;
 r0 = Sym_xi_all*e0;
 
 %Deformation Gradient Tensor, 22-39
-F = [Sym_xiXi_all*e, Sym_xiEta_all*e, Sym_xiZeta_all*e]*inv(J0);
+F_e = [Sym_xiXi_all*e, Sym_xiEta_all*e, Sym_xiZeta_all*e]*inv(J0);
+Jinv = inv(J0);
+F = [
+    (Jinv(1,1)*Sym_xiXi_all + Jinv(2,1)*Sym_xiEta_all + Jinv(3,1)*Sym_xiZeta_all),...
+    (Jinv(1,2)*Sym_xiXi_all + Jinv(2,2)*Sym_xiEta_all + Jinv(3,2)*Sym_xiZeta_all),...
+    (Jinv(1,3)*Sym_xiXi_all + Jinv(2,3)*Sym_xiEta_all + Jinv(3,3)*Sym_xiZeta_all)];
+SF1 = (Jinv(1,1)*Sym_xiXi_all + Jinv(2,1)*Sym_xiEta_all + Jinv(3,1)*Sym_xiZeta_all);
+SF2 = (Jinv(1,2)*Sym_xiXi_all + Jinv(2,2)*Sym_xiEta_all + Jinv(3,2)*Sym_xiZeta_all);
+SF3 = (Jinv(1,3)*Sym_xiXi_all + Jinv(2,3)*Sym_xiEta_all + Jinv(3,3)*Sym_xiZeta_all);
+SF{1} = SF1;
+SF{2} = SF2;
+SF{3} = SF3;
 
 %Cauchy-Green Deformation Tensor 22-40
-C = F.'*F;
+C = F_e.'*F_e;
 
 %Green-Lagrange Strain Tensor, 22-41
 E = 0.5*(C-eye(3));
@@ -214,7 +225,7 @@ E = 0.5*(C-eye(3));
 epsilon = [E(1,1), E(2,2), E(3,3), 2*E(2,3), 2*E(1,3), 2*E(1,2)].';
 
 %Elasticity Matrix, 22-46
-D = ((poissonsR*nu)/((1+nu)*(1-2*nu)))*...
+D = ((youngsM*nu)/((1+nu)*(1-2*nu)))*...
     [
     (1-nu)/nu,1,1,0,0,0;
     1,(1-nu)/nu,1,0,0,0;
@@ -237,17 +248,30 @@ ULH = 0.5*int(ULH,xi,a,b);
 part1 = sym(1);
 for i = 1:3
     for j = 1:3
-        part1 = part1 + (F(i).'*F(i) *e)*((D(i,j)/2)*(e.'*F(j).'*F(j)*e-1));
+        part1 = part1 + (SF{i}.'*SF{i} *e)*((D(i,j)/2)*(e.'*SF{j}.'*SF{j}*e-1));
     end
 end
 % Set up part 2 which is everything but that double summation:
-part2 = ((F(2).'*F(3)+F(3).'*F(2))*e) * (D(4,4)*(e.'*F(2).'*F(3)*e))...
-    + ((F(1).'*F(3)+F(3).'*F(1))*e) * (D(5,5)*(e.'*F(1).'*F(3)*e))...
-    + ((F(1).'*F(2)+F(2).'*F(1))*e) * (D(6,6)*(e.'*F(1).'*F(2)*e)
+part2 = ((SF2.'*SF3+SF3.'*SF2)*e) * (D(4,4)*(e.'*SF2.'*SF3*e))...
+    + ((SF1.'*SF3+SF3.'*SF1)*e) * (D(5,5)*(e.'*SF1.'*SF3*e))...
+    + ((SF1.'*SF2+SF2.'*SF1)*e) * (D(6,6)*(e.'*SF1.'*SF2*e));
+% integrals
+f = (part1+part2)*detJ;
+a = -1;
+b = 1;
+% integrals
+Q_intLH = int(f,zeta,a,b);
+Q_intLH= int(Q_intLH,eta,a,b);
+Q_intLH = (-1)*int(Q_intLH,xi,a,b);
 
 
+%% Part F) Gen. force vector due to external point force
+force_loc = [10*cosd(45),0,10*sind(45)]; %location in global coordinates, provided
+pointXi = 1; %TBD
+force_applied = 1; %TBD
+%Slide 24-20
+Q_ext = (Sym_xi_all*pointXi.').'*force_applied;
 
-    
     
 
 
