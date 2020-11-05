@@ -21,12 +21,13 @@ r2 = [0.5;0;0]; %r(j+1)
 p1 = [-0.25;0;0]; %r(j)
 r2 = [0.25;0;0]; %r(j+1)
 
-% For node 1:
-xi = (2*p1(1))/L; %slide 21-26
-eta = (2*p1(2))/W;
-zeta = (2*p1(3))/H;
+% % For node 1:
+% xi = (2*p1(1))/L; %slide 21-26
+% eta = (2*p1(2))/W;
+% zeta = (2*p1(3))/H;
 
-%% Part a) Shape function in normalized coordinates
+%% Part A) Shape function in normalized coordinates
+syms xi eta zeta
 % Slide 22-38
 S_xiXi(1) = (3/4)*(xi^2-1);
 S_xiXi(2) = (L/8)*(3*xi^2-2*xi-1);
@@ -47,7 +48,9 @@ S_xiXi_all = [
     S_xiXi(7)*eye(3);
     S_xiXi(8)*eye(3)].';
 
-%% Part b) 
+disp(S_xiXi_all);
+
+%% Part B)
 
 % e0  
 % Undeformed initial position:
@@ -181,6 +184,8 @@ M = int(f,zeta,a,b);
 M = int(M,eta,a,b);
 M = int(M,xi,a,b);
 
+disp(vpa(diag(M)));
+
 %% Part C) Generalized Force Vector due to Gravity
 
 % Function slide 21-35
@@ -193,22 +198,22 @@ Q_g = int(f,zeta,a,b);
 Q_g = int(Q_g,eta,a,b);
 Q_g = int(Q_g,xi,a,b);
 
+disp(vpa(Q_g));
+
 %% Part D) Internal Force Vector
 % Given in the exercise:
 e = [0,0,0,1,0,0,0,1,0,0,0,1,...
     0.5,0,0,...
     0,0,-1,...
     0,1,0,1,0,0].';
+%Slide 22-37
 r = Sym_xi_all*e;
 r0 = Sym_xi_all*e0;
 
 %Deformation Gradient Tensor, 22-39
 F_e = [Sym_xiXi_all*e, Sym_xiEta_all*e, Sym_xiZeta_all*e]*inv(J0);
 Jinv = inv(J0);
-F = [
-    (Jinv(1,1)*Sym_xiXi_all + Jinv(2,1)*Sym_xiEta_all + Jinv(3,1)*Sym_xiZeta_all),...
-    (Jinv(1,2)*Sym_xiXi_all + Jinv(2,2)*Sym_xiEta_all + Jinv(3,2)*Sym_xiZeta_all),...
-    (Jinv(1,3)*Sym_xiXi_all + Jinv(2,3)*Sym_xiEta_all + Jinv(3,3)*Sym_xiZeta_all)];
+
 SF1 = (Jinv(1,1)*Sym_xiXi_all + Jinv(2,1)*Sym_xiEta_all + Jinv(3,1)*Sym_xiZeta_all);
 SF2 = (Jinv(1,2)*Sym_xiXi_all + Jinv(2,2)*Sym_xiEta_all + Jinv(3,2)*Sym_xiZeta_all);
 SF3 = (Jinv(1,3)*Sym_xiXi_all + Jinv(2,3)*Sym_xiEta_all + Jinv(3,3)*Sym_xiZeta_all);
@@ -264,6 +269,32 @@ Q_intLH = int(f,zeta,a,b);
 Q_intLH= int(Q_intLH,eta,a,b);
 Q_intLH = (-1)*int(Q_intLH,xi,a,b);
 
+disp(vpa(Q_intLH));
+
+%% Part E)
+% Nodal Coordinates to find polynomial coefficients, 21-12
+%Find Tp 21-15 directly for 2 node:
+node1 = [-L/2;0;0];
+node2 = [L/2,0,0];
+bp1 = [1, -L/2, 0, 0, 0, 0, L*L/4, -L*L*L/8];
+bpu1 = [0,1,0,0,0,0,-L,(3*L*L)/4];
+bpv1 = [0,0,1,0,-L/2,0,0,0];
+bpw1 = [0,0,0,1,0,-L/2,0,0];
+bp2 = [1, L/2, 0, 0, 0, 0, L*L/4, L*L*L/8];
+bpu2 = [0,1,0,0,0,0,L,(3*L*L)/4];
+bpv2 = [0,0,1,0,L/2,0,0,0];
+bpw2 = [0,0,0,1,0,L/2,0,0];
+Tp = [
+    buildPu(bp1);
+    buildPu(bpu1);
+    buildPu(bpv1);
+    buildPu(bpw1);
+    buildPu(bp2);
+    buildPu(bpu2);
+    buildPu(bpv2);
+    buildPu(bpw2)];
+a0 = inv(Tp)*e0;
+a1 = inv(Tp)*e;
 
 %% Part F) Gen. force vector due to external point force
 force_loc = [10*cosd(45),0,10*sind(45)]; %location in global coordinates, provided
@@ -273,7 +304,14 @@ force_applied = 1; %TBD
 Q_ext = (Sym_xi_all*pointXi.').'*force_applied;
 
     
+%% Supporting Functions
 
+function Pu = buildPu(bp)
+Pu = [
+    bp,zeros(1,8),zeros(1,8);
+    zeros(1,8),bp,zeros(1,8);
+    zeros(1,8),zeros(1,8),bp];
+end
 
 
 
