@@ -274,8 +274,7 @@ disp(vpa(Q_intLH));
 %% Part E)
 % Nodal Coordinates to find polynomial coefficients, 21-12
 %Find Tp 21-15 directly for 2 node:
-node1 = [-L/2;0;0];
-node2 = [L/2,0,0];
+
 bp1 = [1, -L/2, 0, 0, 0, 0, L*L/4, -L*L*L/8];
 bpu1 = [0,1,0,0,0,0,-L,(3*L*L)/4];
 bpv1 = [0,0,1,0,-L/2,0,0,0];
@@ -295,6 +294,46 @@ Tp = [
     buildPu(bpw2)];
 a0 = inv(Tp)*e0;
 a1 = inv(Tp)*e;
+
+num = 1000;
+points(1,:) = linspace(-0.25,0.25,num);
+points(2,:) = zeros(1,num);
+points(3,:) = zeros(1,num);
+
+% for i = 1:num
+%     u = points(1,i);
+%     v = points(2,i);
+%     w = points(3,i);
+%     bp = [1,u,v,w,u*v,u*w,u*u,u*u*u];
+% %     a = inv(Tp)*
+%     Pu = buildPu(bp)
+%     
+% end
+%% 
+% Global Position of nodes:
+r1 = [0;0;0]; %r(j)
+r2 = [0.5;0;0]; %r(j+1)
+
+% (u,v,w)
+p1 = [-0.25;0;0]; %r(j)
+p2 = [0.25;0;0]; %r(j+1)
+
+% % For node 1:
+% xi = (2*p1(1))/L; %slide 21-26
+% eta = (2*p1(2))/W;
+% zeta = (2*p1(3))/H;
+% % 
+% xiR = [-1:0.01:1];
+% u = (L/2)*xiR;
+syms xi eta zeta
+Sym_r_p = Sym_xi_all*e;
+xi_ = -1:0.1:1;
+for i = 1:length(xi_)
+    r_p(i,:) = double(subs(Sym_r_p, [xi,eta,zeta], [xi_(i),0,0]));
+end
+
+figure;
+plot(r_p(:,1),r_p(:,3))
 
 %% Part F) Gen. force vector due to external point force
 force_loc = [10*cosd(45),0,10*sind(45)]; %location in global coordinates, provided
