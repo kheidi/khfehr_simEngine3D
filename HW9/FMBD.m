@@ -1,5 +1,5 @@
-%% Vibrating Cantilevered Beam
-% Author: K. Heidi Fehr
+%% Homework 9: Vibrating Cantilevered Beam
+% Author: K. Heidi Fehr, Date: 11/05/2020
 
 %% Knowns
 globalZero = [0;0;0]; % Center of beam, (u,v,w)
@@ -21,10 +21,6 @@ r2 = [0.5;0;0]; %r(j+1)
 p1 = [-0.25;0;0]; %r(j)
 r2 = [0.25;0;0]; %r(j+1)
 
-% % For node 1:
-% xi = (2*p1(1))/L; %slide 21-26
-% eta = (2*p1(2))/W;
-% zeta = (2*p1(3))/H;
 
 %% Part A) Shape function in normalized coordinates
 syms xi eta zeta
@@ -47,8 +43,17 @@ S_xiXi_all = [
     S_xiXi(6)*eye(3);
     S_xiXi(7)*eye(3);
     S_xiXi(8)*eye(3)].';
+fprintf('Normalized Coordinates Shape Function with respect to Xi:\n\n')
+disp(S_xiXi(1));
+disp(S_xiXi(2));
+disp(S_xiXi(3));
+disp(S_xiXi(4));
+disp(S_xiXi(5));
+disp(S_xiXi(6));
+disp(S_xiXi(7));
+disp(S_xiXi(8));
 
-disp(S_xiXi_all);
+
 
 %% Part B)
 
@@ -80,7 +85,7 @@ e1 = [r1;r1_u;r1_j;r1_w];
 e2 = [r2;r2_u;r2_j;r2_w];
 e0 = [e1;e2];
 
-%%% Shape functions, but symbolic:
+%Shape functions, but symbolic:
 syms xi eta zeta
 % Slide 22-38
 Sym_xi(1) = (1/4)*((xi^3)-(3*xi)+2);
@@ -170,10 +175,10 @@ Sym_xiEta_all = diff(Sym_xi_all,eta);
 
 Sym_xiZeta_all = diff(Sym_xi_all,zeta);
 
-%%% Matrix to be normalized:
+% Matrix to be normalized:
 J0 = [Sym_xiXi_all*e0, Sym_xiEta_all*e0, Sym_xiZeta_all*e0];
 detJ = det(J0);
-%%% Expression to integrate:
+% Expression to integrate:
 % limits
 % rho = 1;
 a = -1;
@@ -184,6 +189,7 @@ M = int(f,zeta,a,b);
 M = int(M,eta,a,b);
 M = int(M,xi,a,b);
 
+fprintf('Diagonal terms of M:\n\n')
 disp(vpa(diag(M)));
 
 %% Part C) Generalized Force Vector due to Gravity
@@ -198,6 +204,7 @@ Q_g = int(f,zeta,a,b);
 Q_g = int(Q_g,eta,a,b);
 Q_g = int(Q_g,xi,a,b);
 
+fprintf('Generalized force vector due to gravity:\n\n')
 disp(vpa(Q_g));
 
 %% Part D) Internal Force Vector
@@ -269,88 +276,38 @@ Q_intLH = int(f,zeta,a,b);
 Q_intLH= int(Q_intLH,eta,a,b);
 Q_intLH = (-1)*int(Q_intLH,xi,a,b);
 
+fprintf('Generalized internal force vector:\n\n')
 disp(vpa(Q_intLH));
 
-%% Part E)
-% Nodal Coordinates to find polynomial coefficients, 21-12
-%Find Tp 21-15 directly for 2 node:
-
-bp1 = [1, -L/2, 0, 0, 0, 0, L*L/4, -L*L*L/8];
-bpu1 = [0,1,0,0,0,0,-L,(3*L*L)/4];
-bpv1 = [0,0,1,0,-L/2,0,0,0];
-bpw1 = [0,0,0,1,0,-L/2,0,0];
-bp2 = [1, L/2, 0, 0, 0, 0, L*L/4, L*L*L/8];
-bpu2 = [0,1,0,0,0,0,L,(3*L*L)/4];
-bpv2 = [0,0,1,0,L/2,0,0,0];
-bpw2 = [0,0,0,1,0,L/2,0,0];
-Tp = [
-    buildPu(bp1);
-    buildPu(bpu1);
-    buildPu(bpv1);
-    buildPu(bpw1);
-    buildPu(bp2);
-    buildPu(bpu2);
-    buildPu(bpv2);
-    buildPu(bpw2)];
-a0 = inv(Tp)*e0;
-a1 = inv(Tp)*e;
-
-num = 1000;
-points(1,:) = linspace(-0.25,0.25,num);
-points(2,:) = zeros(1,num);
-points(3,:) = zeros(1,num);
-
-% for i = 1:num
-%     u = points(1,i);
-%     v = points(2,i);
-%     w = points(3,i);
-%     bp = [1,u,v,w,u*v,u*w,u*u,u*u*u];
-% %     a = inv(Tp)*
-%     Pu = buildPu(bp)
-%     
-% end
-%% 
-% Global Position of nodes:
-r1 = [0;0;0]; %r(j)
-r2 = [0.5;0;0]; %r(j+1)
-
-% (u,v,w)
-p1 = [-0.25;0;0]; %r(j)
-p2 = [0.25;0;0]; %r(j+1)
-
-% % For node 1:
-% xi = (2*p1(1))/L; %slide 21-26
-% eta = (2*p1(2))/W;
-% zeta = (2*p1(3))/H;
-% % 
-% xiR = [-1:0.01:1];
-% u = (L/2)*xiR;
+%% Part E) Global position of points & plot
 syms xi eta zeta
-Sym_r_p = Sym_xi_all*e;
-xi_ = -1:0.1:1;
+% Function to calculate positions of points from Xi and nodal coordinates
+Sym_r_p = Sym_xi_all*e; % e contains nodal coordinate 
+xi_ = -1:0.1:1; % Xi
 for i = 1:length(xi_)
     r_p(i,:) = double(subs(Sym_r_p, [xi,eta,zeta], [xi_(i),0,0]));
 end
 
 figure;
 plot(r_p(:,1),r_p(:,3))
+title('Two-Node Beam in at New Global Coordinates')
+axis equal
 
 %% Part F) Gen. force vector due to external point force
-force_loc = [10*cosd(45),0,10*sind(45)]; %location in global coordinates, provided
-pointXi = 1; %TBD
-force_applied = 1; %TBD
+pointXi = [1,0,0]; %TBD
+force_applied = [10*cosd(45);0;10*sind(45)]; %N, provided
+shapePoint = double(subs(Sym_xi_all, [xi,eta,zeta], [1,0,0]));
 %Slide 24-20
-Q_ext = (Sym_xi_all*pointXi.').'*force_applied;
+Q_ext = shapePoint.'*force_applied;
+fprintf('Generalized force vector due to external point force:\n\n')
+disp(Q_ext)
 
-    
-%% Supporting Functions
-
-function Pu = buildPu(bp)
-Pu = [
-    bp,zeros(1,8),zeros(1,8);
-    zeros(1,8),bp,zeros(1,8);
-    zeros(1,8),zeros(1,8),bp];
-end
-
-
-
+%% Part H) Feedback
+% For the most part the assignment was straight forward. I was confused in
+% some of the wordings on the parts. For example in part a) I thought I
+% needed to evaluate the shape function at the given point. When I was
+% working on the homework and looking back at the slides I would have
+% appreciated a clearer explanation of the differences between the nodal
+% coodrinates, normalized coordinates and global coordinates. By the end of
+% the assignment I was like ooooohhhhhhhhhh. I did really appreciate having
+% the hints since it's easy to make a small typo and not notice. 
