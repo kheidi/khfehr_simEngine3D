@@ -1,4 +1,4 @@
-%% Homework 9: Vibrating Cantilevered Beam
+%% Homework 10: Vibrating Cantilevered Beam
 % Author: K. Heidi Fehr, Date: 11/05/2020
 
 %% Knowns
@@ -22,7 +22,7 @@ p1 = [-0.25;0;0]; %r(j)
 r2 = [0.25;0;0]; %r(j+1)
 
 
-%% Part A) Shape function in normalized coordinates
+%%% Part A) Shape function in normalized coordinates
 syms xi eta zeta
 % Slide 22-38
 S_xiXi(1) = (3/4)*(xi^2-1);
@@ -55,7 +55,7 @@ disp(S_xiXi(8));
 
 
 
-%% Part B)
+%%% Part B)
 
 % e0  
 % Undeformed initial position:
@@ -192,7 +192,7 @@ M = int(M,xi,a,b);
 fprintf('Diagonal terms of M:\n\n')
 disp(vpa(diag(M)));
 
-%% Part C) Generalized Force Vector due to Gravity
+%%% Part C) Generalized Force Vector due to Gravity
 
 % Function slide 21-35
 F_grav = g;
@@ -207,7 +207,7 @@ Q_g = int(Q_g,xi,a,b);
 fprintf('Generalized force vector due to gravity:\n\n')
 disp(vpa(Q_g));
 
-%% Part D) Internal Force Vector
+%%% Part D) Internal Force Vector
 % Given in the exercise:
 e = [0,0,0,1,0,0,0,1,0,0,0,1,...
     0.5,0,0,...
@@ -279,7 +279,7 @@ Q_intLH = (-1)*int(Q_intLH,xi,a,b);
 fprintf('Generalized internal force vector:\n\n')
 disp(vpa(Q_intLH));
 
-%% Part E) Global position of points & plot
+%%% Part E) Global position of points & plot
 syms xi eta zeta
 % Function to calculate positions of points from Xi and nodal coordinates
 Sym_r_p = Sym_xi_all*e; % e contains nodal coordinate 
@@ -293,7 +293,7 @@ plot(r_p(:,1),r_p(:,3))
 title('Two-Node Beam in at New Global Coordinates')
 axis equal
 
-%% Part F) Gen. force vector due to external point force
+%%% Part F) Gen. force vector due to external point force
 pointXi = [1,0,0]; %TBD
 force_applied = [10*cosd(45);0;10*sind(45)]; %N, provided
 shapePoint = double(subs(Sym_xi_all, [xi,eta,zeta], [1,0,0]));
@@ -302,12 +302,94 @@ Q_ext = shapePoint.'*force_applied;
 fprintf('Generalized force vector due to external point force:\n\n')
 disp(Q_ext)
 
-%% Part H) Feedback
-% For the most part the assignment was straight forward. I was confused in
-% some of the wordings on the parts. For example in part a) I thought I
-% needed to evaluate the shape function at the given point. When I was
-% working on the homework and looking back at the slides I would have
-% appreciated a clearer explanation of the differences between the nodal
-% coodrinates, normalized coordinates and global coordinates. By the end of
-% the assignment I was like ooooohhhhhhhhhh. I did really appreciate having
-% the hints since it's easy to make a small typo and not notice. 
+%% Homework 10
+
+%% Set up new information
+%%% Constraint, absolute position
+g = [0;0;0];
+phi_abs = [
+    1 0 0 zeros(1,21);
+    0 1 0 zeros(1,21);
+    0 0 1 zeros(1,21)]*e0-g;
+
+%%% New External Force @ Tip
+if t <= 0.05
+    Ftip = [0;0;-(1-cos((2*pi*t)/0.1))];
+    else
+        Ftip = [0;0;0];
+end
+
+%% Functions
+function [Weight, Point] = GQValues(n)
+% Values from: https://pomax.github.io/bezierinfo/legendre-gauss.html
+if n == 1
+    Weight = 2;
+    Point = 0;
+elseif n == 2
+    Weight = [
+        1;
+        1];
+    Point = [
+        -0.5773502691896257;
+        0.5773502691896257];
+elseif n == 3
+    Weight = [
+        0.8888888888888888;
+        0.5555555555555556;
+        0.5555555555555556];
+    Point = [
+        0;
+        -0.7745966692414834;
+        0.7745966692414834];
+elseif n == 4
+    Weight = [
+        0.6521451548625461;
+        0.6521451548625461;
+        0.3478548451374538;
+        0.3478548451374538];
+    Point = [
+        -0.3399810435848563;
+        0.3399810435848563;
+        -0.8611363115940526;
+        0.8611363115940526];
+elseif n == 5
+    Weight = [
+        0.5688888888888889;
+        0.4786286704993665;
+        0.4786286704993665;
+        0.2369268850561891;
+        0.2369268850561891];
+    Point = [
+        0.0000000000000000;
+        -0.5384693101056831;
+        0.5384693101056831;
+        -0.9061798459386640;
+        0.9061798459386640];
+elseif n == 6
+    Weight = [
+        0.3607615730481386;
+        0.3607615730481386;
+        0.4679139345726910;
+        0.4679139345726910;
+        0.1713244923791704;
+        0.1713244923791704];
+    Point = [
+        0.6612093864662645;
+        -0.6612093864662645;
+        -0.2386191860831969;
+        0.2386191860831969;
+        -0.9324695142031521;
+        0.9324695142031521];
+end
+end
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
