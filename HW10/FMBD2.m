@@ -14,6 +14,15 @@ k1 = 10*((1+nu)/(12+11*nu));
 k2 = k1;
 k3 = k2;
 
+D = ((youngsM*nu)/((1+nu)*(1-2*nu)))*...
+    [
+    (1-nu)/nu,1,1,0,0,0;
+    1,(1-nu)/nu,1,0,0,0;
+    1,1,(1-nu)/nu,0,0,0;
+    0,0,0,(1-2*nu)/(2*nu),0,0;
+    0,0,0,0,((1-2*nu)/(2*nu))*k2,0;
+    0,0,0,0,0,((1-2*nu)/(2*nu))*k3];
+
 % Undeformed initial condition
 r1 = [0;0;0]; %r(j)
 r2 = [0.5;0;0]; %r(j+1)
@@ -32,46 +41,42 @@ e = e0; %to start
 %% Start problem as function of time:
 numEl = 1
 ii = 0;
-for t = 0:5e-4:0.5
+
+%%% Mass
+GQPoints = [6,2,2];
+M = getMass(L,H,W,rho,e,GQPoints);
+%%% Q_gravity
+GQPoints = [6,2,2];
+F_grav = g;
+Q_g = getQ_g(L,H,W,rho,e,F_grav,GQPoints);
+%%% Q_internal
+GQPoints = [5,3,3];
+Q_intLH = getQ_int(L,H,W,rho,e0,e,D,GQPoints);
+t = 0;
+%%% New External Force @ Tip
+if t <= 0.05
+    Ftip = [0;0;-(1-cos((2*pi*t)/0.1))];
+    else
+        Ftip = [0;0;0];
+end
+Fxi = 1; %Location of the beam tip centerline in normalized coordinates
+Feta = 0;
+Fzeta = 0;
+Q_ext = Qpointforce(L,W,H,Fxi,Feta,Fzeta,Ftip);
+%%% Sum of Q
+Q_all = Q_g+Q_intLH+Q_ext;
+phi_abs = absCoordinateConstraint(e);
+%Not sure how to make the constraint the right length, temp fill with
+%zeros
+phi_abs = [phi_abs;zeros(12,1)];
+unknowns = [M,phi_abs]\Q_all;
+eddot = unknowns(1:24);
+edot = zeros(24,1);
+lambda = unknowns(25);
+
+for t = 0+5e-4:5e-4:0.5
     ii = ii + 1;
    
-    %%% Mass
-    GQPoints = [6,2,2];
-    M = getMass(L,H,W,rho,e,GQPoints);
-    %%% Q_gravity
-    GQPoints = [6,2,2];
-    F_grav = g;
-    Q_g = getQ_g(L,H,W,rho,e,F_grav,GQPoints);
-    %%% Q_internal
-    D = ((youngsM*nu)/((1+nu)*(1-2*nu)))*...
-        [
-        (1-nu)/nu,1,1,0,0,0;
-        1,(1-nu)/nu,1,0,0,0;
-        1,1,(1-nu)/nu,0,0,0;
-        0,0,0,(1-2*nu)/(2*nu),0,0;
-        0,0,0,0,((1-2*nu)/(2*nu))*k2,0;
-        0,0,0,0,0,((1-2*nu)/(2*nu))*k3];
-    GQPoints = [5,3,3];
-    Q_intLH = getQ_int(L,H,W,rho,e0,e,D,GQPoints);
-    %%% New External Force @ Tip
-    if t <= 0.05
-        Ftip = [0;0;-(1-cos((2*pi*t)/0.1))];
-        else
-            Ftip = [0;0;0];
-    end
-    Fxi = 1; %Location of the beam tip centerline in normalized coordinates
-    Feta = 0;
-    Fzeta = 0;
-    Q_ext = Qpointforce(L,W,H,Fxi,Feta,Fzeta,Ftip);
-    %%% Sum of Q
-    Q_all = Q_g+Q_intLH+Q_ext;
-    phi_abs = absCoordinateConstraint(e);
-    %Not sure how to make the constraint the right length, temp fill with
-    %zeros
-    phi_abs = [phi_abs;zeros(12,1)];
-    unknowns = [M,phi_abs]\Q_all;
-    eddot = unknowns(1:24);
-    edot = zeros(24,1);
     
 end
 
@@ -384,5 +389,82 @@ function Out = Qpointforce(L,W,H,xi,eta,zeta,force)
     S = getS_xi(L,W,H,xi,eta,zeta);
 
     Out = S'*force;
+end
+
+function out = BDF(orderNum,L,H,W,rho,e,GQPoints,h,t,varargin)
+t = t + h;
+M = getMass(L,H,W,rho,e,GQPoints);
+
+% Find constants and set BDF coefficients based on order
+if orderNum == 1
+    %n is current/n-1
+    n = varargin{1};
+    % From table:
+    beta0 = 1;
+    alpha0 = 1;
+    alpha1 = -1;
+    C_r_dot = alpha0*n.r_j_dot;
+    C_p_dot = alpha0*n.p_j_dot;
+    C_r = alpha0*n.r_j + beta0*h*alpha0*n.r_j_dot;
+    C_p = alpha0*n.p_j + beta0*h*alpha0*n.p_j_dot;
+elseif orderNum == 2
+    %n2 is n-2
+    n = varargin{1};
+    n2 = varargin{2};
+    beta0 = 2/3;
+    alpha0 = 1;
+    alpha1 = -4/3;
+    alpha2 = 1/3;
+    C_r_dot = -alpha1*n.r_j_dot + -alpha2*n2.r_j_dot;
+    C_p_dot = -alpha1*n.p_j_dot + -alpha2*n2.p_j_dot;
+    C_r = -alpha1*n.r_j + -alpha2*n2.r_j + beta0*h*C_r_dot;
+    C_p = -alpha1*n.p_j + -alpha2*n2.p_j + beta0*h*C_p_dot;
+    
+end
+
+counter = 1;
+error = 1;
+
+for r = 1
+   
+    %%% Stage 1: Position & Velocity
+    n.e = C_r + beta0^2*h^2*n.eddot;
+    n.edot = C_r_dot + beta0*h*n.eddot;
+    
+    % Find new values
+    %%% Mass
+    GQPoints = [6,2,2];
+    M = getMass(L,H,W,rho,e,GQPoints);
+    %%% Q_gravity
+    GQPoints = [6,2,2];
+    F_grav = g;
+    Q_g = getQ_g(L,H,W,rho,e,F_grav,GQPoints);
+    %%% Q_internal
+    GQPoints = [5,3,3];
+    Q_intLH = getQ_int(L,H,W,rho,e0,e,D,GQPoints);
+    %%% New External Force @ Tip
+    Q_ext = Qpointforce(L,W,H,Fxi,Feta,Fzeta,Ftip);
+    %%% Sum of Q
+    Q_all = Q_g+Q_intLH+Q_ext;
+    phi_abs = absCoordinateConstraint(e);
+    %Not sure how to make the constraint the right length, temp fill with
+    %zeros
+    phi_abs = [phi_abs;zeros(12,1)];
+    
+    % Find residual
+    % How???
+    g = 0;
+    %Jacobian is on lecture 25-18 but I don't understand
+    Jacobian = [M*eddot + phi_abs.'*n.lambda - Q_all;(1/(beta^2*h^2))*phi_abs];
+    deltaZ = Jacobian\g;
+    
+    Z = [n.eddot;n.lambda];
+    Z = Z*deltaZ
+    unknowns = [M,phi_abs]\Q_all;
+    n.eddot = unknowns(1:24);
+    
+
+    error = norm(deltaZ);
+end
 end
 
