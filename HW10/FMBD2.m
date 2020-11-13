@@ -1,8 +1,6 @@
 %% Homework 10: Vibrating Cantilevered Beam
 % Author: K. Heidi Fehr, Date: 11/05/2020
-
 %% Knowns
-
 clear
 L = 0.5; %m
 H = 0.003; %m
@@ -20,91 +18,93 @@ k3 = k2;
 r1 = [0;0;0]; %r(j)
 r2 = [0.5;0;0]; %r(j+1)
 r1_u = [1;0;0];
-r1_j = [0;1;0];
+r1_v = [0;1;0];
 r1_w = [0;0;1];
 r2_u = [1;0;0];
-r2_j = [0;1;0];
+r2_v = [0;1;0];
 r2_w = [0;0;1];
 
-e1 = [r1;r1_u;r1_j;r1_w];
-e2 = [r2;r2_u;r2_j;r2_w];
+e1 = [r1;r1_u;r1_v;r1_w];
+e2 = [r2;r2_u;r2_v;r2_w];
 e0 = [e1;e2];
+e = e0; %to start
 
-GQPoints = [6,2,2];
-M = getMass(L,H,W,rho,e0,GQPoints);
-
-fprintf('Diagonal terms of M:\n\n')
-disp(vpa(diag(M)));
-
-%% Part C) Generalized Force Vector due to Gravity
-
-% Function slide 21-35
-GQPoints = [6,2,2];
-F_grav = g;
-Q_g = getQ_g(L,H,W,rho,e0,F_grav,GQPoints);
-
-fprintf('Generalized force vector due to gravity:\n\n')
-disp(vpa(Q_g));
-
-%% Part D) Internal Force Vector
-% Given in the exercise:
-e = [0,0,0,1,0,0,0,1,0,0,0,1,...
-    0.5,0,0,...
-    0,0,-1,...
-    0,1,0,1,0,0].';
-D = ((youngsM*nu)/((1+nu)*(1-2*nu)))*...
-    [
-    (1-nu)/nu,1,1,0,0,0;
-    1,(1-nu)/nu,1,0,0,0;
-    1,1,(1-nu)/nu,0,0,0;
-    0,0,0,(1-2*nu)/(2*nu),0,0;
-    0,0,0,0,((1-2*nu)/(2*nu))*k2,0;
-    0,0,0,0,0,((1-2*nu)/(2*nu))*k3];
-GQPoints = [5,3,3];
-Q_intLH = getQ_int(L,H,W,rho,e0,e,D,GQPoints);
-
-fprintf('Generalized internal force vector:\n\n')
-disp(vpa(Q_intLH));
-
-%% Part E) Global position of points & plot
-syms xi eta zeta
-% Function to calculate positions of points from Xi and nodal coordinates
-Sym_r_p = getS_xi(xi,eta,zeta,L,H,W)*e; % e contains nodal coordinate 
-xi_ = -1:0.1:1; % Xi
-for i = 1:length(xi_)
-    r_p(i,:) = double(subs(Sym_r_p, [xi,eta,zeta], [xi_(i),0,0]));
+%% Start problem as function of time:
+numEl = 1
+ii = 0;
+for t = 0:5e-4:0.5
+    ii = ii + 1;
+   
+    %%% Mass
+    GQPoints = [6,2,2];
+    M = getMass(L,H,W,rho,e,GQPoints);
+    %%% Q_gravity
+    GQPoints = [6,2,2];
+    F_grav = g;
+    Q_g = getQ_g(L,H,W,rho,e,F_grav,GQPoints);
+    %%% Q_internal
+    D = ((youngsM*nu)/((1+nu)*(1-2*nu)))*...
+        [
+        (1-nu)/nu,1,1,0,0,0;
+        1,(1-nu)/nu,1,0,0,0;
+        1,1,(1-nu)/nu,0,0,0;
+        0,0,0,(1-2*nu)/(2*nu),0,0;
+        0,0,0,0,((1-2*nu)/(2*nu))*k2,0;
+        0,0,0,0,0,((1-2*nu)/(2*nu))*k3];
+    GQPoints = [5,3,3];
+    Q_intLH = getQ_int(L,H,W,rho,e0,e,D,GQPoints);
+    %%% New External Force @ Tip
+    if t <= 0.05
+        Ftip = [0;0;-(1-cos((2*pi*t)/0.1))];
+        else
+            Ftip = [0;0;0];
+    end
+    Fxi = 1; %Location of the beam tip centerline in normalized coordinates
+    Feta = 0;
+    Fzeta = 0;
+    Q_ext = Qpointforce(L,W,H,Fxi,Feta,Fzeta,Ftip);
+    %%% Sum of Q
+    Q_all = Q_g+Q_intLH+Q_ext;
+    phi_abs = absCoordinateConstraint(e);
+    %Not sure how to make the constraint the right length, temp fill with
+    %zeros
+    phi_abs = [phi_abs;zeros(12,1)];
+    unknowns = [M,phi_abs]\Q_all;
+    eddot = unknowns(1:24);
+    edot = zeros(24,1);
+    
 end
 
-figure;
-plot(r_p(:,1),r_p(:,3))
-title('Two-Node Beam in at New Global Coordinates')
-axis equal
-
-%% Part F) Gen. force vector due to external point force
-pointXi = [1,0,0]; %TBD
-force_applied = [10*cosd(45);0;10*sind(45)]; %N, provided
-shapePoint = double(subs(getS_xi(xi,eta,zeta,L,H,W), [xi,eta,zeta], [1,0,0]));
-%Slide 24-20
-Q_ext = shapePoint.'*force_applied;
-fprintf('Generalized force vector due to external point force:\n\n')
-disp(Q_ext)
-
-%% Homework 10
-
-%% Set up new information
-%%% Constraint, absolute position
-g = [0;0;0];
-phi_abs = [
-    1 0 0 zeros(1,21);
-    0 1 0 zeros(1,21);
-    0 0 1 zeros(1,21)]*e0-g;
-
-%%% New External Force @ Tip
-if t <= 0.05
-    Ftip = [0;0;-(1-cos((2*pi*t)/0.1))];
-    else
-        Ftip = [0;0;0];
-end
+%% Attempt more elements
+% syms xi eta zeta
+% % Function to calculate positions of points from Xi and nodal coordinates
+% numEl = 4;
+% clear n
+% for i = 1:numEl+1
+%     n(:,i) = [
+%         (L/numEl)*(i-1);0;0;
+%         1;0;0;
+%         0;1;0;
+%         0;0;1];   
+% end
+% clear e_4el;
+% 
+% for i = 1:numEl
+%     e_4el(:,i) = [n(:,i);n(:,i+1)];
+% end
+% figure;
+% for i = 1
+%     Sym_r_p = getS_xi(xi,eta,zeta,L,H,W)*e_4el; % e contains nodal coordinate 
+%     xi_ = -1:0.1:1; % Xi
+%     for i = 1:length(xi_)
+%         r_p(i,:) = double(subs(Sym_r_p, [xi,eta,zeta], [xi_(i),0,0]));
+%     end
+%     plot(r_p(:,1),r_p(:,3))
+%     title('Two-Node Beam in at New Global Coordinates')
+%     axis equal
+%     hold on
+%     plot(r_p(end,1),r_p(end,3),'o')
+% end
 
 %% Functions
 function [Weight, Point] = GQValues(n)
@@ -360,3 +360,29 @@ for i = 1:length(P_xi)
 end
 Q_int = -1*Q_int;  
 end
+
+function phi = absCoordinateConstraint(e0)
+g = [0;0;0];
+phi_abs = [
+    1 0 0 zeros(1,21);
+    0 1 0 zeros(1,21);
+    0 0 1 zeros(1,21)]*e0-g;
+phi_dotabsy = [0,1,0]*e0(4:6,1);
+phi_dotabsz = [0,0,1]*e0(4:6,1);
+phi_absgrad = [
+    e0(7,1);
+    e0(8,1)-1;
+    e0(9,1);
+    e0(10,1);
+    e0(11,1);
+    e0(12,1)-1];
+phi = [phi_abs;0;phi_dotabsy;phi_dotabsz;phi_absgrad]
+end
+
+
+function Out = Qpointforce(L,W,H,xi,eta,zeta,force)
+    S = getS_xi(L,W,H,xi,eta,zeta);
+
+    Out = S'*force;
+end
+
