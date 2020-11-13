@@ -42,7 +42,7 @@ ylim([-1,10])
 title('Velocity of particles')
 
 
-%% Smoothing Function
+%% Part (1) Smoothing Function
 % The following loop compares each particle to all other particles, except
 % for itself
 grad_vx = cell(1,100);
@@ -76,7 +76,15 @@ for i = 1:100
     grad_vx{i} = grad_vx{i}*(mass/rho);
 end
 
-%% Analytical Solution
+disp('Velocity Gradient')
+for i = 1:100
+    fprintf('Particle number %d:\n', i)
+    disp(grad_vx{i})
+end
+
+%% Part (2): Analytical Solution Comparison
+% The solution I computed is very different from the analytical solution as
+% can be seen in some examples below. 
 
 for i = 1:100 
     X = x{i}(1);
@@ -118,9 +126,36 @@ disp(max(maxA))
 disp('Min Error')
 disp(min(minA))
 
-%% Part (4)
+%% Part (3): Gradient Close to the Boundary
+% I know that the best results should be in the middle of the group of
+% particles, this is because the center has more information about its
+% neighbours. However in my results the error seems random, the edges are
+% bad and the middle is bad.
+
+%% Part (4): Find the time derivative
+% I had issues understanding how to implement the formulas as I don't have
+% experience with functions that use the alpha and beta. I did my best!
+
 sum1 = 0;
 sum2 = 0;
+
+%%% Find epsilon
+% Non pairwise form
+alpha = 1;
+beta = 1;
+for i = 1:100
+    for j = 1:100
+        sum1 = sum1 + (mass/rho)*v{j}(beta)*gradiW{i}(alpha);
+        sum2 = sum2 + (mass/rho)*v{j}(alpha)*gradiW{i}(beta);
+        if alpha == beta
+            epsilon{i}(alpha,beta) = sum1+sum2+([v{i}(beta) v{i}(alpha)]*[gradiW{i}(alpha);gradiW{i}(beta)])-(2/3)*dot(v{j},gradiW{j});
+        else
+            epsilon{i}(alpha,beta) = sum1+sum2;
+        end
+    end
+    sum1 = 0;
+    sum2 = 0;
+end
 
 alpha = 1;
 beta = 2;
@@ -129,12 +164,78 @@ for i = 1:100
         sum1 = sum1 + (mass/rho)*v{j}(beta)*gradiW{i}(alpha);
         sum2 = sum2 + (mass/rho)*v{j}(alpha)*gradiW{i}(beta);
         if alpha == beta
-            epsilon{i} = sum1+sum2+([v{i}(beta) v{i}(alpha)]*[gradiW{i}(alpha);gradiW{i}(beta)])-(2/3)*dot(v{j},gradiW{j});
+            epsilon{i}(alpha,beta) = sum1+sum2+([v{i}(beta) v{i}(alpha)]*[gradiW{i}(alpha);gradiW{i}(beta)])-(2/3)*dot(v{j},gradiW{j});
         else
-            epsilon{i} = sum1+sum2;
+            epsilon{i}(alpha,beta) = sum1+sum2;
         end
     end
     sum1 = 0;
     sum2 = 0;
 end
 
+alpha = 2;
+beta = 2;
+for i = 1:100
+    for j = 1:100
+        sum1 = sum1 + (mass/rho)*v{j}(beta)*gradiW{i}(alpha);
+        sum2 = sum2 + (mass/rho)*v{j}(alpha)*gradiW{i}(beta);
+        if alpha == beta
+            epsilon{i}(alpha,beta) = sum1+sum2+([v{i}(beta) v{i}(alpha)]*[gradiW{i}(alpha);gradiW{i}(beta)])-(2/3)*dot(v{j},gradiW{j});
+        else
+            epsilon{i}(alpha,beta) = sum1+sum2;
+        end
+    end
+    sum1 = 0;
+    sum2 = 0;
+end
+alpha = 2;
+beta = 1;
+for i = 1:100
+    for j = 1:100
+        sum1 = sum1 + (mass/rho)*v{j}(beta)*gradiW{i}(alpha);
+        sum2 = sum2 + (mass/rho)*v{j}(alpha)*gradiW{i}(beta);
+        if alpha == beta
+            epsilon{i}(alpha,beta) = sum1+sum2+([v{i}(beta) v{i}(alpha)]*[gradiW{i}(alpha);gradiW{i}(beta)])-(2/3)*dot(v{j},gradiW{j});
+        else
+            epsilon{i}(alpha,beta) = sum1+sum2;
+        end
+    end
+    sum1 = 0;
+    sum2 = 0;
+end
+
+%%% Time derivative of velocity
+alpha = 1;
+beta = 1;
+sum1 = 0;
+sum2 = 0;
+for i = 1:100
+    for j = 1:100
+        sum1 = sum1 + (-mass)*((p/(rho^2))+(p/(rho^2)))*gradiW{i}(alpha);
+        
+        sum2 = sum2 + mass*(mu/(rho^2))*(epsilon{i}(1,:)+epsilon{j}(1,:))*gradiW{i}.';
+        dv{i}(alpha,beta) = sum1+sum2;
+    end
+    sum1 = 0;
+    sum2 = 0;
+end
+alpha = 2;
+beta = 1;
+sum1 = 0;
+sum2 = 0;
+for i = 1:100
+    for j = 1:100
+        sum1 = sum1 + (-mass)*((p/(rho^2))+(p/(rho^2)))*gradiW{i}(alpha);
+        
+        sum2 = sum2 + mass*(mu/(rho^2))*(epsilon{i}(1,:)+epsilon{j}(1,:))*gradiW{i}.';
+        dv{i}(alpha,beta) = sum1+sum2;
+    end
+    sum1 = 0;
+    sum2 = 0;
+end
+
+disp('Time derivative of velocity')
+for i = 1:100
+    fprintf('Particle number %d:\n', i)
+    disp(dv{i})
+end
