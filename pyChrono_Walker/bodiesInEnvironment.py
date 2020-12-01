@@ -12,6 +12,7 @@
 import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
 import math as m
+from scipy.spatial.transform import Rotation as R
 
 
 print (" Practice of placing and connecting shapes with Irrlicht visualization")
@@ -28,14 +29,22 @@ application.AddTypicalLogo(chrono.GetChronoDataFile('logo_pychrono_alpha.png'))
 application.AddTypicalCamera(chronoirr.vector3df(0, 4, -6))
 application.AddTypicalLights()
 
+# Contact material
+material = chrono.ChMaterialSurfaceNSC()
+material.SetFriction(0.8)
+material.SetCompliance(0)
+
 # Create a rigid body as usual, and add it
 # to the physical system:
 mfloor = chrono.ChBody()
 mfloor.SetBodyFixed(True)
+mfloor.SetPos( chrono.ChVectorD(0,0,0) )
+# Tilt the floor 10 degrees
+mfloor.SetRot( chrono.ChQuaternionD(0.996,0,0,-0.087) )
 
 
-# Contact material
-floor_mat = chrono.ChMaterialSurfaceNSC()
+
+
 
 # Add body to system
 mphysicalSystem.Add(mfloor)
@@ -56,8 +65,19 @@ mfloor.AddAsset(mfloorcolor)
 
 
 mbody = chrono.ChBody()
-mbody.SetBodyFixed(True)
+mbody.SetMass(60)
+mbody.SetName('Hip')
+mbody.GetCollisionModel().ClearModel()
+mbody.GetCollisionModel().AddSphere(material, 0.05)
+mbody.GetCollisionModel().BuildModel()
+mbody.SetInertiaXX(chrono.ChVectorD(0.001, 0.001, 0.001))
+mbody.SetCollide(True)
 mphysicalSystem.Add(mbody)
+
+
+# ==Hip==
+# hip = chrono.ChBody()
+# hip.SetMass(60)
 
 # ==Asset== Attach a 'sphere' (hip)
 hip = chrono.ChSphereShape()
@@ -65,19 +85,19 @@ hip.GetSphereGeometry().rad = 0.2
 hip.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
 mbody.AddAsset(hip)
 
-# ==Asset== Attach also a 'cylinder' shape (thigh)
-thigh = chrono.ChCylinderShape()
-thigh.GetCylinderGeometry().p1 = chrono.ChVectorD(0, 1, 0)
-thigh.GetCylinderGeometry().p2 = chrono.ChVectorD(0, 0.4, 0.3)
-thigh.GetCylinderGeometry().rad = 0.05
-mbody.AddAsset(thigh)
+# # ==Asset== Attach also a 'cylinder' shape (thigh)
+# thigh = chrono.ChCylinderShape()
+# thigh.GetCylinderGeometry().p1 = chrono.ChVectorD(0, 1, 0)
+# thigh.GetCylinderGeometry().p2 = chrono.ChVectorD(0, 0.4, 0.3)
+# thigh.GetCylinderGeometry().rad = 0.05
+# mbody.AddAsset(thigh)
 
-# ==Asset== Attach also a 'cylinder' shape
-shank = chrono.ChCylinderShape()
-shank.GetCylinderGeometry().p1 = chrono.ChVectorD(0, 0.4, 0.3)
-shank.GetCylinderGeometry().p2 = chrono.ChVectorD(0, 0, 0.3)
-shank.GetCylinderGeometry().rad = 0.05
-mbody.AddAsset(shank)
+# # ==Asset== Attach also a 'cylinder' shape (Shank)
+# shank = chrono.ChCylinderShape()
+# shank.GetCylinderGeometry().p1 = chrono.ChVectorD(0, 0.4, 0.3)
+# shank.GetCylinderGeometry().p2 = chrono.ChVectorD(0, 0, 0.3)
+# shank.GetCylinderGeometry().rad = 0.05
+# mbody.AddAsset(shank)
 
 
 # ==Asset== Attach a video camera. This will be used by Irrlicht, 
@@ -100,7 +120,7 @@ application.AssetUpdateAll()
 #
 # THE SOFT-REAL-TIME CYCLE
 #
-application.SetTimestep(0.01)
+application.SetTimestep(0.001)
 application.SetTryRealtime(True)
 
 while application.GetDevice().run():
@@ -108,4 +128,5 @@ while application.GetDevice().run():
     application.DrawAll()
     application.DoStep()
     application.EndScene()
+
 
