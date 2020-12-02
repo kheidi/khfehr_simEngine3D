@@ -14,39 +14,34 @@ import pychrono.irrlicht as chronoirr
 # ---------------------------------------------------------------------
 #
 #  Create the simulation system and add items
+#
 
-mysystem = chrono.ChSystemNSC()
+mysystem      = chrono.ChSystemNSC()
 
 
-# Set the global collision margins.
+
+# Set the global collision margins. This is expecially important for very large or
+# very small objects. Set this before creating shapes. Not before creating mysystem.
 chrono.ChCollisionModel.SetDefaultSuggestedEnvelope(0.001);
 chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001);
 
 # ---------------------------------------------------------------------
 #
 #  Create the simulation system and add items
+#
 
 # Create a contact material (with default properties, shared by all collision shapes)
 contact_material = chrono.ChMaterialSurfaceNSC()
-contact_material.SetFriction(0.5)
+contact_material.SetFriction(.7)
 contact_material.SetDampingF(0.2)
 contact_material.SetCompliance (0.0005)
 contact_material.SetComplianceT(0.0005)
 
-# ---------------------------------------------------------------------
-#
-#  Create floor
-
-# mfloor = chrono.ChBodyEasyBox(5, 0.3, 5, 10000,True,True, contact_material)
-# # mfloor.SetPos( chrono.ChVectorD(0,0,0) )
-# # mfloor.SetRot( chrono.ChQuaternionD(0.996,0,0,-0.087) ) # Tilt the floor 10 degrees
-# mfloor.SetBodyFixed(True)
-# mysystem.Add(mfloor)
-
-mfloor = chrono.ChBodyEasyBox(3, 0.2, 3, 1000,True,True, contact_material)
+# Create floor
+mfloor = chrono.ChBodyEasyBox(5, 0.3, 5, 100000,True,True, contact_material)
+mfloor.SetRot( chrono.ChQuaternionD(  -0.0610485, 0, 0, 0.9981348  )) # Tilt the floor -7 degrees
 mfloor.SetBodyFixed(True)
 mysystem.Add(mfloor)
-
 
 # Attach color asset
 mfloorcolor = chrono.ChColorAsset()
@@ -57,14 +52,11 @@ mfloor.AddAsset(mfloorcolor)
 #
 #  Create body
 
-body_A = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+body_A = chrono.ChBody() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
 body_A.SetPos(chrono.ChVectorD(0,2,0))
-body_A.SetMass(30)
-body_A.SetInertiaXX(chrono.ChVectorD(3,3,3))
+body_A.SetMass(1)
+body_A.SetInertiaXX(chrono.ChVectorD(.3,.3,.3))
 body_A.SetInertiaXY(chrono.ChVectorD(0,0,0))
-body_A.SetFrame_COG_to_REF(chrono.ChFrameD(
-            chrono.ChVectorD( 0,0.0,0),
-            chrono.ChQuaternionD(0,0,0,0))) #Here you would define the relationship bw COG to REF
 
 # ---------------------------------------------------------------------
 #
@@ -72,7 +64,7 @@ body_A.SetFrame_COG_to_REF(chrono.ChFrameD(
 
 sphere = chrono.ChSphereShape()
 sphere.GetSphereGeometry().rad = 0.25
-sphere.GetSphereGeometry().center = chrono.ChVectorD(0.1,1,0)
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0,0,0)
 body_A.AddAsset(sphere)
 
 # ---------------------------------------------------------------------
@@ -85,18 +77,16 @@ body_A.GetCollisionModel().BuildModel()
 body_A.SetCollide(True)
 mysystem.Add(body_A)
 
+
 # ---------------------------------------------------------------------
 #
 #  Create body
 
-body_B = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
-body_B.SetPos(chrono.ChVectorD(0,4,0))
-body_B.SetMass(30)
-body_B.SetInertiaXX(chrono.ChVectorD(3,3,3))
+body_B = chrono.ChBody() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+body_B.SetPos(chrono.ChVectorD(.07,4,0))
+body_B.SetMass(1)
+body_B.SetInertiaXX(chrono.ChVectorD(.3,.3,.3))
 body_B.SetInertiaXY(chrono.ChVectorD(0,0,0))
-body_B.SetFrame_COG_to_REF(chrono.ChFrameD(
-            chrono.ChVectorD( 0,0.0,0),
-            chrono.ChQuaternionD(0,0,0,0))) #Here you would define the relationship bw COG to REF
 
 # ---------------------------------------------------------------------
 #
@@ -104,7 +94,7 @@ body_B.SetFrame_COG_to_REF(chrono.ChFrameD(
 
 sphere = chrono.ChSphereShape()
 sphere.GetSphereGeometry().rad = 0.25
-sphere.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0,0,0)
 body_B.AddAsset(sphere)
 
 # ---------------------------------------------------------------------
@@ -121,14 +111,11 @@ mysystem.Add(body_B)
 #
 #  Create body
 
-body_C = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+body_C = chrono.ChBody() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
 body_C.SetPos(chrono.ChVectorD(0,5,1))
 body_C.SetMass(5)
 body_C.SetInertiaXX(chrono.ChVectorD(0.02,0.02,0.02))
 body_C.SetInertiaXY(chrono.ChVectorD(0,0,0))
-body_C.SetFrame_COG_to_REF(chrono.ChFrameD(
-            chrono.ChVectorD( 0,0.0,0),
-            chrono.ChQuaternionD(0,0,0,0))) #Here you would define the relationship bw COG to REF
 
 # ---------------------------------------------------------------------
 #
@@ -136,7 +123,7 @@ body_C.SetFrame_COG_to_REF(chrono.ChFrameD(
 
 sphere = chrono.ChSphereShape()
 sphere.GetSphereGeometry().rad = 0.1
-sphere.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0,0,0)
 body_C.AddAsset(sphere)
 
 # ---------------------------------------------------------------------
