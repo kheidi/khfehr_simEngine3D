@@ -28,21 +28,37 @@ chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001);
 
 # Create a contact material (with default properties, shared by all collision shapes)
 contact_material = chrono.ChMaterialSurfaceNSC()
+contact_material.SetFriction(0.5)
+contact_material.SetDampingF(0.2)
+contact_material.SetCompliance (0.0005)
+contact_material.SetComplianceT(0.0005)
 
-# Create a floor
-mfloor = chrono.ChBody()
-mfloor.SetPos( chrono.ChVectorD(0,0,0) )
-# Tilt the floor 10 degrees
-mfloor.SetRot( chrono.ChQuaternionD(0.996,0,0,-0.087) )
+# ---------------------------------------------------------------------
+#
+#  Create floor
+
+# mfloor = chrono.ChBodyEasyBox(5, 0.3, 5, 10000,True,True, contact_material)
+# # mfloor.SetPos( chrono.ChVectorD(0,0,0) )
+# # mfloor.SetRot( chrono.ChQuaternionD(0.996,0,0,-0.087) ) # Tilt the floor 10 degrees
+# mfloor.SetBodyFixed(True)
+# mysystem.Add(mfloor)
+
+mfloor = chrono.ChBodyEasyBox(3, 0.2, 3, 1000,True,True, contact_material)
 mfloor.SetBodyFixed(True)
 mysystem.Add(mfloor)
+
+
+# Attach color asset
+mfloorcolor = chrono.ChColorAsset()
+mfloorcolor.SetColor(chrono.ChColor(0.3, 0.3, 0.6))
+mfloor.AddAsset(mfloorcolor)
 
 # ---------------------------------------------------------------------
 #
 #  Create body
 
 body_A = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
-body_A.SetPos(chrono.ChVectorD(0,1,0))
+body_A.SetPos(chrono.ChVectorD(0,2,0))
 body_A.SetMass(30)
 body_A.SetInertiaXX(chrono.ChVectorD(3,3,3))
 body_A.SetInertiaXY(chrono.ChVectorD(0,0,0))
@@ -56,7 +72,7 @@ body_A.SetFrame_COG_to_REF(chrono.ChFrameD(
 
 sphere = chrono.ChSphereShape()
 sphere.GetSphereGeometry().rad = 0.25
-sphere.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0.1,1,0)
 body_A.AddAsset(sphere)
 
 # ---------------------------------------------------------------------
@@ -71,24 +87,79 @@ mysystem.Add(body_A)
 
 # ---------------------------------------------------------------------
 #
+#  Create body
+
+body_B = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+body_B.SetPos(chrono.ChVectorD(0,4,0))
+body_B.SetMass(30)
+body_B.SetInertiaXX(chrono.ChVectorD(3,3,3))
+body_B.SetInertiaXY(chrono.ChVectorD(0,0,0))
+body_B.SetFrame_COG_to_REF(chrono.ChFrameD(
+            chrono.ChVectorD( 0,0.0,0),
+            chrono.ChQuaternionD(0,0,0,0))) #Here you would define the relationship bw COG to REF
+
+# ---------------------------------------------------------------------
+#
+#  Add visualization of sphere
+
+sphere = chrono.ChSphereShape()
+sphere.GetSphereGeometry().rad = 0.25
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
+body_B.AddAsset(sphere)
+
+# ---------------------------------------------------------------------
+#
+#  Add the collision shape
+
+body_B.GetCollisionModel().ClearModel()
+body_B.GetCollisionModel().AddSphere(contact_material, 0.25)
+body_B.GetCollisionModel().BuildModel()
+body_B.SetCollide(True)
+mysystem.Add(body_B)
+
+# ---------------------------------------------------------------------
+#
+#  Create body
+
+body_C = chrono.ChBodyAuxRef() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+body_C.SetPos(chrono.ChVectorD(0,5,1))
+body_C.SetMass(5)
+body_C.SetInertiaXX(chrono.ChVectorD(0.02,0.02,0.02))
+body_C.SetInertiaXY(chrono.ChVectorD(0,0,0))
+body_C.SetFrame_COG_to_REF(chrono.ChFrameD(
+            chrono.ChVectorD( 0,0.0,0),
+            chrono.ChQuaternionD(0,0,0,0))) #Here you would define the relationship bw COG to REF
+
+# ---------------------------------------------------------------------
+#
+#  Add visualization of sphere
+
+sphere = chrono.ChSphereShape()
+sphere.GetSphereGeometry().rad = 0.1
+sphere.GetSphereGeometry().center = chrono.ChVectorD(0,1,0)
+body_C.AddAsset(sphere)
+
+# ---------------------------------------------------------------------
+#
+#  Add the collision shape
+
+body_C.GetCollisionModel().ClearModel()
+body_C.GetCollisionModel().AddSphere(contact_material, 0.1)
+body_C.GetCollisionModel().BuildModel()
+body_C.SetCollide(True)
+mysystem.Add(body_C)
+
+# ---------------------------------------------------------------------
+#
 #  Create an Irrlicht application to visualize the system
 
 myapplication = chronoirr.ChIrrApp(mysystem, 'PyChrono example', chronoirr.dimension2du(1024,768))
 
 myapplication.AddTypicalSky()
 myapplication.AddTypicalLogo(chrono.GetChronoDataFile('logo_pychrono_alpha.png'))
-myapplication.AddTypicalCamera(chronoirr.vector3df(0.5,0.5,1), chronoirr.vector3df(0,0,0))
-#myapplication.AddTypicalLights()
-myapplication.AddLightWithShadow(chronoirr.vector3df(3,6,2),    # point
-                                 chronoirr.vector3df(0,0,0),    # aimpoint
-                                 12,                 # radius (power)
-                                 1,11,              # near, far
-                                 55)                # angle of FOV
-
-            # ==IMPORTANT!== Use this function for adding a ChIrrNodeAsset to all items
-			# in the system. These ChIrrNodeAsset assets are 'proxies' to the Irrlicht meshes.
-			# If you need a finer control on which item really needs a visualization proxy in
-			# Irrlicht, just use application.AssetBind(myitem); on a per-item basis.
+myapplication.AddTypicalCamera(chronoirr.vector3df(0,5,-6), chronoirr.vector3df(0,0,0))
+myapplication.AddTypicalCamera(chronoirr.vector3df(0, 4, -6))
+myapplication.AddTypicalLights()
 
 myapplication.AssetBindAll();
 
