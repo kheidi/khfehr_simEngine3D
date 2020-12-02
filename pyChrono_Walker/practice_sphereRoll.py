@@ -10,6 +10,7 @@
 
 import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
+import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------
 #
@@ -166,17 +167,49 @@ myapplication.AddShadowAll();
 #
 
 
-myapplication.SetTimestep(0.005)
+# Initialize these lists to store values to plot.
+array_time   = []
+array_forceA = []
+array_forceB = []
+array_forceC = []
 
+myapplication.SetTimestep(0.005)
+myapplication.SetTryRealtime(True)
+
+# Run the interactive simulation loop
 while(myapplication.GetDevice().run()):
-    print(body_B.GetContactForce ())
+    
+    # for plotting, append instantaneous values:
+    array_time.append(mysystem.GetChTime())
+    array_forceA.append(body_A.GetContactForce().y)
+    array_forceB.append(body_B.GetContactForce().y)
+    array_forceC.append(body_C.GetContactForce().y)
+    
+    # here happens the visualization and step time integration
     myapplication.BeginScene()
     myapplication.DrawAll()
     myapplication.DoStep()
     myapplication.EndScene()
+    
+    # stop simulation after 2 seconds
+    if mysystem.GetChTime() > 20:
+          myapplication.GetDevice().closeDevice()
 
 
+# Use matplotlib to make two plots when simulation ended:
+fig, (ax1, ax2, ax3) = plt.subplots(3, sharex = True)
 
+ax1.plot(array_time, array_forceA)
+ax1.set(ylabel='force (A)')
+ax1.grid()
+
+ax2.plot(array_time, array_forceB)
+ax2.set(ylabel='force (B)')
+ax2.grid()
+
+ax3.plot(array_time, array_forceC)
+ax3.set(ylabel='force (C)')
+ax3.grid()
 
 
 
