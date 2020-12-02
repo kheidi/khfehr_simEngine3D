@@ -32,13 +32,13 @@ chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001);
 
 # Create a contact material (with default properties, shared by all collision shapes)
 contact_material = chrono.ChMaterialSurfaceNSC()
-contact_material.SetFriction(.7)
+contact_material.SetFriction(.1)
 contact_material.SetDampingF(0.2)
 contact_material.SetCompliance (0.0005)
 contact_material.SetComplianceT(0.0005)
 
 # Create floor
-mfloor = chrono.ChBodyEasyBox(5, 0.3, 5, 100000,True,True, contact_material)
+mfloor = chrono.ChBodyEasyBox(20, 0.3, 6, 100000,True,True, contact_material)
 mfloor.SetRot( chrono.ChQuaternionD(  -0.0610485, 0, 0, 0.9981348  )) # Tilt the floor -7 degrees
 mfloor.SetBodyFixed(True)
 mysystem.Add(mfloor)
@@ -169,6 +169,7 @@ myapplication.AddShadowAll();
 myapplication.SetTimestep(0.005)
 
 while(myapplication.GetDevice().run()):
+    print(body_B.GetContactForce ())
     myapplication.BeginScene()
     myapplication.DrawAll()
     myapplication.DoStep()
