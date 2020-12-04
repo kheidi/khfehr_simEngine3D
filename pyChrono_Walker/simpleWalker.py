@@ -9,6 +9,8 @@
 
 import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
+import numpy as np
+import math
 
 # ---------------------------------------------------------------------
 #
@@ -16,8 +18,6 @@ import pychrono.irrlicht as chronoirr
 #
 
 mysystem      = chrono.ChSystemNSC()
-
-
 
 # Set the global collision margins. This is expecially important for very large or
 # very small objects. Set this before creating shapes. Not before creating mysystem.
@@ -46,6 +46,82 @@ mysystem.Add(mfloor)
 mfloorcolor = chrono.ChColorAsset()
 mfloorcolor.SetColor(chrono.ChColor(0.3, 0.3, 0.6))
 mfloor.AddAsset(mfloorcolor)
+
+# Create wall to simulate in 2D
+mwall = chrono.ChBodyEasyBox(20,6,0.3,10000,True,True,contact_material)
+mwall.SetPos(chrono.ChVectorD(0,3,2.85))
+mwall.SetRot( chrono.ChQuaternionD(  -0.0610485, 0, 0, 0.9981348  )) # Tilt the floor -7 degrees
+mwall.SetBodyFixed(True)
+mysystem.Add(mwall)
+mwall.AddAsset(mfloorcolor)
+
+# ---------------------------------------------------------------------
+#
+#  Create bodies
+#
+
+# Define Properties
+initial_hipPos = chrono.ChVectorD(0,3,0)
+leg_length = 0.85
+leg_radius = 0.05
+leg_density = 250
+leg_mass = leg_density * leg_length * math.pi* pow (leg_radius,2)
+leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
+
+# Create left leg
+leg_left = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
+leg_left.SetPos(chrono.ChVectorD(0,3, 0))
+mysystem.Add(leg_left)
+
+# Create right leg
+leg_right = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
+leg_right.SetPos(chrono.ChVectorD(0,3, 0))
+mysystem.Add(leg_right)
+
+
+# ---------------------------------------------------------------------
+#
+#  Create Markers
+#
+
+proximal_left = chrono.ChMarker()
+proximal_left.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
+leg_left.AddMarker(proximal_left)
+
+proximal_right = chrono.ChMarker()
+proximal_right.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
+leg_right.AddMarker(proximal_right)
+
+distal_left = chrono.ChMarker()
+distal_left.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,-leg_length/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
+leg_left.AddMarker(distal_left)
+
+distal_right = chrono.ChMarker()
+distal_right.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,-leg_length/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
+leg_right.AddMarker(distal_right)
+
+
+# ---------------------------------------------------------------------
+#
+#  Add Constraints
+#
+
+# Add a revolute joint 
+rev = chrono.ChLinkLockRevolute()
+rev.SetName('Revolute')
+rev.Initialize(proximal_left,proximal_right)
+#rev.Initialize(leg_left, leg_right, True, chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)))
+mysystem.AddLink(rev)
+
+
+
+
+
+
+
+
+
+
 
 
 # ---------------------------------------------------------------------
@@ -81,7 +157,6 @@ myapplication.AddShadowAll();
 myapplication.SetTimestep(0.005)
 
 while(myapplication.GetDevice().run()):
-    print(body_B.GetContactForce ())
     myapplication.BeginScene()
     myapplication.DrawAll()
     myapplication.DoStep()

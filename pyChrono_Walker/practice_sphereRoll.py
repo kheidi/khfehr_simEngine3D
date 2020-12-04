@@ -199,16 +199,17 @@ while(myapplication.GetDevice().run()):
 # Use matplotlib to make two plots when simulation ended:
 fig, (ax1, ax2, ax3) = plt.subplots(3, sharex = True)
 
+
 ax1.plot(array_time, array_forceA)
-ax1.set(ylabel='force (A)')
+ax1.set(ylabel='Y force A')
 ax1.grid()
 
 ax2.plot(array_time, array_forceB)
-ax2.set(ylabel='force (B)')
+ax2.set(ylabel='Y force B')
 ax2.grid()
 
 ax3.plot(array_time, array_forceC)
-ax3.set(ylabel='force (C)')
+ax3.set(ylabel='Y force C')
 ax3.grid()
 
 
