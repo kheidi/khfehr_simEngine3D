@@ -11,6 +11,7 @@ import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
 import numpy as np
 import math
+from scipy.spatial.transform import Rotation as R
 
 # ---------------------------------------------------------------------
 #
@@ -72,21 +73,41 @@ leg_mass = leg_density * leg_length * math.pi* pow (leg_radius,2)
 leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
 
 # Initial Conditions
-# Right Leg
-xR = (leg_length/2)*np.sin(theta)
-yR = (leg_length/2)*np.cos(theta)
+# Interior angles, C is the initial angle between the legs
+a = leg_length
+b = leg_length/2
+c = leg_length
+A = np.arccos((b*b+c*c-a*a)/(2*b*c))
+B = A
+C = np.arccos((a*a+b*b-c*c)/2*a*b)
+
+# Initial foot positions
+fp_left_X = 0
+fp_left_Y = 0
+fp_right_X = (leg_length/2)*np.sin(np.radians(9))
+fp_right_Y = (leg_length/2)*np.cos(np.radians(9))
+
 # Left Leg
-xL = xR+np.cos(incline)
-yL = yR-np.sin(incline)
+xL = (leg_length/2)*np.cos(B+np.radians(9))
+yL = (leg_length/2)*np.sin(B+np.radians(9))
+# Right Leg
+xR = fp_right_X + (leg_length/2)*np.sin(90-(A-np.radians(9)))
+yR = fp_right_Y + (leg_length/2)*np.cos(90-(A-np.radians(9)))
 
 # Create left leg
 leg_left = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
 leg_left.SetPos(chrono.ChVectorD(xL,yL, 0))
+r = R.from_euler('z', -(np.radians(90-9)-A), degrees=False)
+r = r.as_quat()
+leg_left.SetRot( chrono.ChQuaternionD( r[0], r[1], r[2], r[3] ))
 mysystem.Add(leg_left)
 
 # Create right leg
 leg_right = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
 leg_right.SetPos(chrono.ChVectorD(xR,yR, 0))
+r = R.from_euler('z', (np.radians(90-9)-A), degrees=False)
+r = r.as_quat()
+leg_right.SetRot( chrono.ChQuaternionD( r[0], r[1], r[2], r[3] ))
 mysystem.Add(leg_right)
 
 
@@ -177,7 +198,7 @@ myapplication.AddShadowAll();
 #
 
 
-myapplication.SetTimestep(0.005)
+myapplication.SetTimestep(0.0005)
 
 while(myapplication.GetDevice().run()):
     myapplication.BeginScene()
