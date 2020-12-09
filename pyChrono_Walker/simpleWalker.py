@@ -68,8 +68,8 @@ mwall.AddAsset(mfloorcolor)
 # Define Properties
 mymass = 60 #kg
 foot_mass = mymass*0.0133 #https://exrx.net/Kinesiology/Segments
-leg_mass = foot_mass + mymass*0.0535
-initial_hipPos = chrono.ChVectorD(0,1,0)
+leg_mass = mymass*0.0535
+initial_hipPos = chrono.ChVectorD(0,2,0)
 leg_length = 0.85
 leg_radius = 0.05
 leg_volume = math.pi*pow(leg_radius,2)*leg_length
@@ -78,7 +78,10 @@ incline = np.radians(7)
 theta = 0.3
 phi = 0.4
 leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
-
+foot_length = 0.1
+foot_radius = 0.05
+foot_volume = math.pi*pow(foot_radius,2)*foot_length
+foot_density = foot_mass/foot_volume
 
 # Create hip
 hipBody = chrono.ChBodyEasyEllipsoid(chrono.ChVectorD(.2,.2,.2 ),leg_density,True,False,contact_material)
@@ -107,7 +110,7 @@ right_hip_frame = chrono.ChFrameD()
 right_hip_frame.SetCoord(right_hipJoint_P.GetCoord())
 
 # Create left leg
-leg_left = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
+leg_left = chrono.ChBodyEasyCylinder(leg_radius, leg_length, leg_density,True,True,contact_material)
 center_leg_left= left_hip_frame*chrono.ChVectorD(-(leg_length/2)*np.sin(-theta),-(leg_length/2)*np.cos(-theta),0)
 print(center_leg_left)
 q = chrono.ChQuaternionD()
@@ -119,7 +122,7 @@ leg_left.SetRot(q)
 mysystem.Add(leg_left)
 
 # Create right leg
-leg_right = chrono.ChBodyEasyCylinder(leg_radius, leg_length, 1000,True,True,contact_material)
+leg_right = chrono.ChBodyEasyCylinder(leg_radius, leg_length, leg_density,True,True,contact_material)
 center_leg_right= right_hip_frame*chrono.ChVectorD(-(leg_length/2)*np.sin(phi-theta),-(leg_length/2)*np.cos(phi-theta),0)
 print(center_leg_right)
 q = chrono.ChQuaternionD()
@@ -130,34 +133,32 @@ leg_right.SetRot(q)
 # leg_right.SetBodyFixed(True)
 mysystem.Add(leg_right)
 
+# Create feet
+foot_left = chrono.ChBodyEasyCylinder(foot_radius, foot_length, foot_density,True,True,contact_material)
+end_leg_left= left_hip_frame*chrono.ChVectorD(-(leg_length+foot_radius)*np.sin(-theta),-(leg_length+foot_radius)*np.cos(-theta),0)
+print(end_leg_left)
+q1 = chrono.ChQuaternionD()
+q1.Q_from_AngAxis(-theta, chrono.ChVectorD(0,0,-1))
+q2 = chrono.ChQuaternionD()
+q2.Q_from_AngAxis(np.radians(90), chrono.ChVectorD(1,0,0))
+print('q',q1*q2)
+foot_left.SetPos(end_leg_left)
+foot_left.SetRot(q1*q2)
+# foot_left.SetBodyFixed(True)
+mysystem.Add(foot_left)
 
-floor_contactP = chrono.ChMarker()
-floor_contactP.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,floor_thickness/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
-mfloor.AddMarker(floor_contactP)
-
-proximal_left = chrono.ChMarker()
-proximal_left.SetPos(left_hip_frame*chrono.ChVectorD(0,0,0))
-leg_left.AddMarker(proximal_left)
-
-proximal_right = chrono.ChMarker()
-proximal_right.SetPos(right_hip_frame*chrono.ChVectorD(0,0,0))
-leg_right.AddMarker(proximal_right)
-
-distal_left = chrono.ChMarker()
-distal_left.SetPos(left_hip_frame*chrono.ChVectorD(0,0,0))
-leg_left.AddMarker(distal_left)
-
-distal_right = chrono.ChMarker()
-distal_right.Impose_Rel_Coord(chrono.ChCoordsysD(chrono.ChVectorD(0,-leg_length/2,0), chrono.ChQuaternionD(1, 0, 0, 0)))
-leg_right.AddMarker(distal_right)
-
-print('PL',proximal_left.GetPos())
-print('PR',proximal_right.GetPos())
-print('DL',distal_left.GetPos())
-print('DR',distal_right.GetPos())
-print('leftleg',leg_left.GetPos())
-
-
+foot_right = chrono.ChBodyEasyCylinder(foot_radius, foot_length, foot_density,True,True,contact_material)
+end_leg_right=  right_hip_frame*chrono.ChVectorD(-(leg_length+foot_radius)*np.sin(phi-theta),-(leg_length+foot_radius)*np.cos(phi-theta),0)
+print(end_leg_right)
+q1 = chrono.ChQuaternionD()
+q1.Q_from_AngAxis(-theta, chrono.ChVectorD(0,0,-1))
+q2 = chrono.ChQuaternionD()
+q2.Q_from_AngAxis(np.radians(90), chrono.ChVectorD(1,0,0))
+print('q',q1*q2)
+foot_right.SetPos(end_leg_right)
+foot_right.SetRot(q1*q2)
+# foot_right.SetBodyFixed(True)
+mysystem.Add(foot_right)
 
 
 
@@ -170,19 +171,28 @@ print('leftleg',leg_left.GetPos())
 hipJoint_L = chrono.ChLinkLockRevolute()
 hipJoint_L.SetName('Revolute')
 hipJoint_L.Initialize(leg_left,hipBody,True,chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0),chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0.1),chrono.ChQuaternionD(1, 0, 0, 0)))
-#hipJoint.Initialize(leg_left, leg_right, True, chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)))
 mysystem.AddLink(hipJoint_L)
 
 hipJoint_R = chrono.ChLinkLockRevolute()
 hipJoint_R.SetName('Revolute2')
 hipJoint_R.Initialize(leg_right,hipBody,True,chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0),chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,-0.1),chrono.ChQuaternionD(1, 0, 0, 0)))
-#hipJoint.Initialize(leg_left, leg_right, True, chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)))
 mysystem.AddLink(hipJoint_R)
 
+ankleJoint_L = chrono.ChLinkMateFix()
+ankleJoint_L.Initialize(leg_left, foot_left)
+mysystem.AddLink(ankleJoint_L)
 
-# hipJoint_L.GetLimit_Rz().SetActive(True)
-# hipJoint_L.GetLimit_Rz().SetMin(math.pi/3)
-#hipJoint.GetLimit_Rz().SetMax(-math.pi/3)
+ankleJoint_R = chrono.ChLinkMateFix()
+ankleJoint_R.Initialize(leg_right, foot_right)
+mysystem.AddLink(ankleJoint_R)
+
+hipJoint_L.GetLimit_Rz().SetActive(True)
+hipJoint_L.GetLimit_Rz().SetMin(math.pi/3)
+hipJoint_L.GetLimit_Rz().SetMax(-math.pi/3)
+
+hipJoint_R.GetLimit_Rz().SetActive(True)
+hipJoint_R.GetLimit_Rz().SetMin(math.pi/3)
+hipJoint_R.GetLimit_Rz().SetMax(-math.pi/3)
 
 # sticky_heel_contact = chrono.ChLinkDistance()
 # sticky_heel_contact.SetName('Sticky Heel Contact')
