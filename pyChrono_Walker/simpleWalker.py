@@ -1,11 +1,11 @@
 
 #------------------------------------------------------------------------------
-# Name:        Simple Walker Attempt 2
+# Name:        Simple Walker Attempt
 # Purpose:     Implementing the simpliest walking model in 2D 
 #
 # Author:      Katherine Heidi Fehr
 #
-# Created:     12/8/2020
+# Created:     12/1/2020
 #------------------------------------------------------------------------------
 
 import pychrono.core as chrono
@@ -21,10 +21,11 @@ from scipy.spatial.transform import Rotation as R
 
 mysystem      = chrono.ChSystemNSC()
 
+
 # Set the global collision margins. This is expecially important for very large or
 # very small objects. Set this before creating shapes. Not before creating mysystem.
 chrono.ChCollisionModel.SetDefaultSuggestedEnvelope(0.001);
-chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001);
+chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.0005);
 
 # ---------------------------------------------------------------------
 #
@@ -66,16 +67,16 @@ mwall.AddAsset(mfloorcolor)
 #
 
 # Define Properties
+initial_hipPos = chrono.ChVectorD(0,1.15,0)
 mymass = 60 #kg
 foot_mass = mymass*0.0133 #https://exrx.net/Kinesiology/Segments
 leg_mass = mymass*0.0535
-initial_hipPos = chrono.ChVectorD(0,2,0)
 leg_length = 0.85
 leg_radius = 0.05
 leg_volume = math.pi*pow(leg_radius,2)*leg_length
 leg_density = leg_mass/leg_volume
 incline = np.radians(7)
-theta = 0.3
+theta = 0.2
 phi = 0.4
 leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
 foot_length = 0.1
@@ -86,9 +87,8 @@ foot_density = foot_mass/foot_volume
 # Create hip
 hipBody = chrono.ChBodyEasyEllipsoid(chrono.ChVectorD(.2,.2,.2 ),leg_density,True,False,contact_material)
 hipBody.SetPos(initial_hipPos)
-#hipBody.SetBodyFixed(True)
+# hipBody.SetBodyFixed(True)
 mysystem.Add(hipBody)
-
 
 # Hip Joint locations
 left_hipJoint_P = chrono.ChMarker()
@@ -167,7 +167,7 @@ mysystem.Add(foot_right)
 #  Add Constraints
 #
 
-# Add a revolute joint 
+# Add a revolute joint where the leg connects to the hip 
 hipJoint_L = chrono.ChLinkLockRevolute()
 hipJoint_L.SetName('Revolute')
 hipJoint_L.Initialize(leg_left,hipBody,True,chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0),chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0.1),chrono.ChQuaternionD(1, 0, 0, 0)))
@@ -178,6 +178,19 @@ hipJoint_R.SetName('Revolute2')
 hipJoint_R.Initialize(leg_right,hipBody,True,chrono.ChCoordsysD(chrono.ChVectorD(0,leg_length/2,0),chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,-0.1),chrono.ChQuaternionD(1, 0, 0, 0)))
 mysystem.AddLink(hipJoint_R)
 
+
+# Add some limits since we don't want the walker to do the splits
+
+hipJoint_L.GetLimit_Rz().SetActive(True)
+hipJoint_L.GetLimit_Rz().SetMin((2*math.pi)/3)
+hipJoint_L.GetLimit_Rz().SetMax(-(2*math.pi)/3)
+
+# hipJoint_R.GetLimit_Rz().SetActive(True)
+# hipJoint_R.GetLimit_Rz().SetMin((2*math.pi)/3)
+# hipJoint_R.GetLimit_Rz().SetMax(-(2*math.pi)/3)
+
+# Constraint to fix the feet to the bottom of the legs
+
 ankleJoint_L = chrono.ChLinkMateFix()
 ankleJoint_L.Initialize(leg_left, foot_left)
 mysystem.AddLink(ankleJoint_L)
@@ -186,13 +199,9 @@ ankleJoint_R = chrono.ChLinkMateFix()
 ankleJoint_R.Initialize(leg_right, foot_right)
 mysystem.AddLink(ankleJoint_R)
 
-hipJoint_L.GetLimit_Rz().SetActive(True)
-hipJoint_L.GetLimit_Rz().SetMin(math.pi/3)
-hipJoint_L.GetLimit_Rz().SetMax(-math.pi/3)
-
-hipJoint_R.GetLimit_Rz().SetActive(True)
-hipJoint_R.GetLimit_Rz().SetMin(math.pi/3)
-hipJoint_R.GetLimit_Rz().SetMax(-math.pi/3)
+# alignhip = chrono.ChLinkLockParallel()
+# alignhip.Initialize(mfloor,hipBody,True,chrono.ChCoordsysD(chrono.ChVectorD(0,0,0),chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0),chrono.ChQuaternionD(1, 0, 0, 0)))
+# mysystem.AddLink(alignhip)
 
 # sticky_heel_contact = chrono.ChLinkDistance()
 # sticky_heel_contact.SetName('Sticky Heel Contact')
@@ -206,20 +215,17 @@ hipJoint_R.GetLimit_Rz().SetMax(-math.pi/3)
 # #sticky_heel_right.Initialize(leg_left, leg_right, True, chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)),chrono.ChCoordsysD(chrono.ChVectorD(0,0,0), chrono.ChQuaternionD(1, 0, 0, 0)))
 # mysystem.AddLink(sticky_heel_right)
 
-# plane_plane_left = chrono.ChLinkLockPlanePlane()
-# plane_plane_left.Initialize(mfloor, 
-#                        leg_left, 
-#                        chrono.ChCoordsysD(chrono.ChVectorD(-1.25, -0.75, 0), chrono.ChQuaternionD(1, 0, 0, 0)))
-# mysystem.AddLink(plane_plane_left)
+plane_plane_left = chrono.ChLinkLockPlanePlane()
+plane_plane_left.Initialize(mfloor, 
+                        leg_left, 
+                        chrono.ChCoordsysD(chrono.ChVectorD(-1.25, -0.75, 0), chrono.ChQuaternionD(1, 0, 0, 0)))
+mysystem.AddLink(plane_plane_left)
 
-# plane_plane_right = chrono.ChLinkLockPlanePlane()
-# plane_plane_right.Initialize(mfloor, 
-#                        leg_right, 
-#                        chrono.ChCoordsysD(chrono.ChVectorD(-1.25, -0.75, 0), chrono.ChQuaternionD(1, 0, 0, 0)))
-# mysystem.AddLink(plane_plane_right)
-
-
-
+plane_plane_right = chrono.ChLinkLockPlanePlane()
+plane_plane_right.Initialize(mfloor, 
+                        leg_right, 
+                        chrono.ChCoordsysD(chrono.ChVectorD(-1.25, -0.75, 0), chrono.ChQuaternionD(1, 0, 0, 0)))
+mysystem.AddLink(plane_plane_right)
 
 
 # ---------------------------------------------------------------------
@@ -251,6 +257,9 @@ myapplication.AddShadowAll();
 #  Run the simulation
 #
 
+sticky_L = chrono.ChLinkRevolute()
+sticky_L.Initialize(foot_left,mfloor,foot_left.GetFrame_REF_to_abs())
+mysystem.AddLink(sticky_L)
 
 myapplication.SetTimestep(0.0005)
 
@@ -258,6 +267,13 @@ while(myapplication.GetDevice().run()):
     myapplication.BeginScene()
     chronoirr.ChIrrTools.drawAllCOGs(mysystem, myapplication.GetVideoDriver(), 2)
     myapplication.DrawAll()
+    t = mysystem.GetChTime()
+    print('time: ',mysystem.GetChTime())
+    if t>.3:
+        sticky_L.SetDisabled(False)
+    else:
+        sticky_L.SetDisabled(True)
+        # print(sticky_L.IsActive())
     myapplication.DoStep()
     myapplication.EndScene()
 
