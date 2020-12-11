@@ -12,7 +12,7 @@ import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
 import numpy as np
 import math
-from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------
 #
@@ -196,7 +196,7 @@ ankleJoint_swing.Initialize(leg_swing, foot_swing)
 mysystem.AddLink(ankleJoint_swing)
 
 ankleJoint_stance = chrono.ChLinkMateFix()
-ankleJoint_stance.Initialize(leg_stance, foot_stance)
+ankleJoint_stance.Initialize(foot_stance, leg_stance)
 mysystem.AddLink(ankleJoint_stance)
 
 # alignhip = chrono.ChLinkLockParallel()
@@ -253,8 +253,13 @@ sticky_swing = chrono.ChLinkRevolute()
 sticky_swing.Initialize(foot_swing,mfloor,foot_swing.GetFrame_REF_to_abs())
 mysystem.AddLink(sticky_swing)
 
-# sticky_stance.SetDisabled(False)
+# sticky_stance.SetDisabled(True)
+# sticky_swing.SetDisabled(True)
 myapplication.SetTimestep(0.0005)
+
+array_time = []
+array_hipY = []
+array_hipX = []
 
 while(myapplication.GetDevice().run()):
     myapplication.BeginScene()
@@ -262,16 +267,27 @@ while(myapplication.GetDevice().run()):
     myapplication.DrawAll()
     t = mysystem.GetChTime()
     print('time: ',mysystem.GetChTime())
+    sticky_stance.Initialize(foot_stance,mfloor,foot_stance.GetFrame_REF_to_abs())
+    sticky_swing.Initialize(foot_swing,mfloor,foot_swing.GetFrame_REF_to_abs())
     if t<0.4:
         sticky_stance.SetDisabled(False)
         sticky_swing.SetDisabled(True)
         # print(sticky_stance.GetLeftDOF())
-    else:
+    elif t>=0.4 and t<0.85:
         sticky_stance.SetDisabled(True)
         sticky_swing.SetDisabled(False)
         # print(sticky_stance.GetLeftDOF())
         # print(sticky_stance.IsActive())
+    else:
+        sticky_stance.SetDisabled(False)
+        sticky_swing.SetDisabled(True)
+    array_time.append(mysystem.GetChTime())
+    array_hipY.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.y)
+    array_hipX.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.x)
     myapplication.DoStep()
     myapplication.EndScene()
+    
+fig, (ax1) = plt.subplots(1,sharex = True)
 
+ax1.plot(array_hipX,array_hipY)
 
