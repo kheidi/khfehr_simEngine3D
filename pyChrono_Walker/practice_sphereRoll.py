@@ -11,6 +11,7 @@
 import pychrono.core as chrono
 import pychrono.irrlicht as chronoirr
 import matplotlib.pyplot as plt
+import numpy as np
 
 # ---------------------------------------------------------------------
 #
@@ -19,7 +20,8 @@ import matplotlib.pyplot as plt
 
 mysystem      = chrono.ChSystemNSC()
 
-
+incline = np.radians(1)
+mysystem.Set_G_acc(chrono.ChVectorD(-9.810*np.sin(incline),-9.810*np.cos(incline),0))
 
 # Set the global collision margins. This is expecially important for very large or
 # very small objects. Set this before creating shapes. Not before creating mysystem.
@@ -137,6 +139,43 @@ body_C.GetCollisionModel().BuildModel()
 body_C.SetCollide(True)
 mysystem.Add(body_C)
 
+# ---------------------------------------------------------------------
+# Falling arc
+# arc = chrono.ChBody()
+# mysystem.Add(arc)
+# arcShape = chrono.ChLineArc(chrono.ChCoordsysD(chrono.ChVectorD(0,3,0)),1,-chrono.CH_C_PI_2, chrono.CH_C_PI_2) #body that has an auxiliary frame that is not necessarily coincident with the COG frame
+# arcAdd  = chrono.ChPathShape()
+# arcAdd.GetPathGeometry().AddSubLine(arcShape)
+# arc.SetCollide(True)
+# arcShape.Set_closed(True)
+# arc.GetCollisionModel().ClearModel()
+# arc.GetCollisionModel().AddSubLine(contact_material)
+
+# arc.SetMass(10)
+# arc.AddAsset(arcAdd)
+# #arcShape.SetPos(chrono.ChVectorD(0,4,0))
+# # arcShape.SetMass(1)
+# # arcShape.SetInertiaXX(chrono.ChVectorD(.3,.3,.3))
+# # arcShape.SetInertiaXY(chrono.ChVectorD(0,0,0))
+
+# ---------------------------------------------------------------------
+#
+#  Add visualization of sphere
+
+# sphere = chrono.ChSphereShape()
+# sphere.GetSphereGeometry().rad = 0.25
+# sphere.GetSphereGeometry().center = chrono.ChVectorD(0,0,0)
+# arcShape.AddAsset(sphere)
+
+# # ---------------------------------------------------------------------
+# #
+# #  Add the collision shape
+
+# arcShape.GetCollisionModel().ClearModel()
+# arcShape.GetCollisionModel().AddSphere(contact_material, 0.25)
+# arcShape.GetCollisionModel().BuildModel()
+# arcShape.SetCollide(True)
+# mysystem.AddAsset(arcShape)
 # ---------------------------------------------------------------------
 #
 #  Create an Irrlicht application to visualize the system
