@@ -13,13 +13,14 @@ import pychrono.irrlicht as chronoirr
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # ---------------------------------------------------------------------
 #
 #  Create the simulation system and add items
 #
 
-incline = np.radians(2)
+incline = np.radians(1)
 mysystem  = chrono.ChSystemNSC()
 mysystem.Set_G_acc(chrono.ChVectorD(-9.810*np.sin(incline),-9.810*np.cos(incline),0))
 
@@ -37,7 +38,7 @@ chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.0005);
 # Create a contact material (with default properties, shared by all collision shapes)
 contact_material = chrono.ChMaterialSurfaceNSC()
 contact_material.SetFriction(.1)
-#contact_material.SetDampingF(0.2)
+contact_material.SetDampingF(0.2)
 # contact_material.SetCompliance (0.0005)
 # contact_material.SetComplianceT(0.0005)
 
@@ -82,7 +83,7 @@ theta1 = np.radians(11.5)
 theta2 = np.radians(7)
 leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
 foot_length = 0.005
-foot_radius = 0.033
+foot_radius = 0.03
 foot_volume = math.pi*pow(foot_radius,2)*foot_length
 foot_density = foot_mass/foot_volume
 
@@ -278,11 +279,12 @@ array_hipY = []
 array_hipX = []
 array_angle = []
 array_case = []
+array_togtime = []
 
 case = True
 togtime = 0
-togtime_Threshold = 0.15
-angle_Threshold = 30
+togtime_Threshold = 0.05
+angle_Threshold = 40
 
 
 while(myapplication.GetDevice().run()):
@@ -309,6 +311,7 @@ while(myapplication.GetDevice().run()):
             if angleBWLegs > angle_Threshold-2 and angleBWLegs < angle_Threshold+2:
                 case = not case
                 togtime = 0
+                
         if case == 0:
             foot_swing.SetCollide(True)
             foot_stance.SetCollide(False)
@@ -340,6 +343,7 @@ while(myapplication.GetDevice().run()):
     array_hipY.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.y)
     array_hipX.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.x)
     array_angle.append(angleBWLegs)
+    array_togtime.append(togtime)
     array_case.append(case)
     myapplication.DoStep()
     myapplication.EndScene()
@@ -355,3 +359,9 @@ ax1.grid()
 ax2.plot(array_time, array_case)
 ax2.set(ylabel='Case')
 ax2.grid()
+
+plt.savefig('Graph.png')
+
+
+df = pd.DataFrame({"time" : array_time, "angle" : array_angle, "Togtime" : array_togtime})
+df.to_csv("results.csv", index=False)
