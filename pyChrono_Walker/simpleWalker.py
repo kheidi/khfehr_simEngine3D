@@ -276,7 +276,13 @@ myapplication.SetTimestep(0.0005)
 array_time = []
 array_hipY = []
 array_hipX = []
+array_angle = []
+array_case = []
 
+case = True
+togtime = 0
+togtime_Threshold = 0.15
+angle_Threshold = 30
 
 
 while(myapplication.GetDevice().run()):
@@ -285,16 +291,44 @@ while(myapplication.GetDevice().run()):
     myapplication.DrawAll()
     t = mysystem.GetChTime()
     print('time: ',mysystem.GetChTime())
+    stance_V = foot_stance.GetPos()-leg_stance.GetPos()
+    stance_V_norm = stance_V/(np.sqrt(pow(stance_V.x,2)+pow(stance_V.y,2)+pow(stance_V.z,2)))
+    swing_V = foot_swing.GetPos()-leg_swing.GetPos()
+    swing_V_norm = swing_V/(np.sqrt(pow(swing_V.x,2)+pow(swing_V.y,2)+pow(swing_V.z,2)))
+    stance_array = np.array([stance_V_norm.x,stance_V_norm.y,stance_V_norm.z])
+    swing_array = np.array([swing_V_norm.x,swing_V_norm.y,swing_V_norm.z])
+    
+    angleBWLegs = np.degrees(np.arccos(np.dot(stance_array,swing_array)))
+    print('angle: ',(angleBWLegs))
+    
+    togtime = togtime + myapplication.GetTimestep()
+    if t>0.15 and t<=0.25:
+        foot_swing.SetCollide(False)
+    elif t>0.25:
+        if togtime >= togtime_Threshold:
+            if angleBWLegs > angle_Threshold-2 and angleBWLegs < angle_Threshold+2:
+                case = not case
+                togtime = 0
+        if case == 0:
+            foot_swing.SetCollide(True)
+            foot_stance.SetCollide(False)
+        elif case == 1:
+            foot_swing.SetCollide(False)
+            foot_stance.SetCollide(True)
+
+           
+    
+        
     # sticky_stance.Initialize(foot_stance,mfloor,foot_stance.GetFrame_REF_to_abs())
     # sticky_swing.Initialize(foot_swing,mfloor,foot_swing.GetFrame_REF_to_abs())
-    if t>0.15 and t<=0.3:
-        foot_swing.SetCollide(False)
+    # if t>0.15 and t<=0.3:
+    #     foot_swing.SetCollide(False)
     #     sticky_stance.SetDisabled(False)
     #     sticky_swing.SetDisabled(True)
     #     # print(sticky_stance.GetLeftDOF())
-    elif t>0.3:#t>=0.4 and t<0.85:
-        foot_swing.SetCollide(True)
-        foot_stance.SetCollide(False)
+    # elif t>0.3:#t>=0.4 and t<0.85:
+    #     foot_swing.SetCollide(True)
+    #     foot_stance.SetCollide(False)
     #     sticky_stance.SetDisabled(True)
     #     sticky_swing.SetDisabled(False)
     #     # print(sticky_stance.GetLeftDOF())
@@ -305,10 +339,19 @@ while(myapplication.GetDevice().run()):
     array_time.append(mysystem.GetChTime())
     array_hipY.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.y)
     array_hipX.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.x)
+    array_angle.append(angleBWLegs)
+    array_case.append(case)
     myapplication.DoStep()
     myapplication.EndScene()
     
-fig, (ax1) = plt.subplots(1,sharex = True)
 
-ax1.plot(array_hipX,array_hipY)
+fig, (ax1, ax2) = plt.subplots(2, sharex = True)
 
+
+ax1.plot(array_time, array_angle)
+ax1.set(ylabel='Angle between Legs')
+ax1.grid()
+
+ax2.plot(array_time, array_case)
+ax2.set(ylabel='Case')
+ax2.grid()
