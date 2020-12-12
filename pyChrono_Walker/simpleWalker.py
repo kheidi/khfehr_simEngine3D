@@ -280,6 +280,10 @@ array_hipX = []
 array_angle = []
 array_case = []
 array_togtime = []
+array_stancefoot_x = []
+array_stancefoot_y = []
+array_swingfoot_x = []
+array_swingfoot_y = []
 
 case = True
 togtime = 0
@@ -345,6 +349,10 @@ while(myapplication.GetDevice().run()):
     array_angle.append(angleBWLegs)
     array_togtime.append(togtime)
     array_case.append(case)
+    array_stancefoot_x.append(foot_stance.GetPos().x-foot_radius)
+    array_stancefoot_y.append(foot_stance.GetPos().y-foot_radius)
+    array_swingfoot_x.append(foot_swing.GetPos().x-foot_radius)
+    array_swingfoot_y.append(foot_swing.GetPos().y-foot_radius)
     myapplication.DoStep()
     myapplication.EndScene()
     
@@ -363,5 +371,12 @@ ax2.grid()
 plt.savefig('Graph.png')
 
 
-df = pd.DataFrame({"time" : array_time, "angle" : array_angle, "Togtime" : array_togtime})
+df = pd.DataFrame({"time" : array_time,
+                   "angle" : array_angle,
+                   "Togtime" : array_togtime,
+                   "Stance Pos X": array_stancefoot_x,
+                   "Stance Pos Y": array_stancefoot_y,
+                   "Swing Pos X": array_swingfoot_x,
+                   "Swing Pos Y": array_swingfoot_y
+                   })
 df.to_csv("results.csv", index=False)
