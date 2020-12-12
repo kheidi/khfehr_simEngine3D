@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 #  Create the simulation system and add items
 #
 
-incline = np.radians(1)
+incline = np.radians(2)
 mysystem  = chrono.ChSystemNSC()
 mysystem.Set_G_acc(chrono.ChVectorD(-9.810*np.sin(incline),-9.810*np.cos(incline),0))
 
@@ -44,14 +44,14 @@ contact_material.SetFriction(.1)
 # Create floor
 floor_thickness = 0.3
 mfloor = chrono.ChBodyEasyBox(20, floor_thickness, 6, 100000,True,True, contact_material)
-mfloor.SetPos(chrono.ChVectorD(0, 0, 0))
+mfloor.SetPos(chrono.ChVectorD(0, -floor_thickness/2, 0))
 # mfloor.SetRot( chrono.ChQuaternionD(  -0.0610485, 0, 0, 0.9981348  )) # Tilt the floor -7 degrees
 mfloor.SetBodyFixed(True)
 mysystem.Add(mfloor)
 
 # Attach color asset
 mfloorcolor = chrono.ChColorAsset()
-mfloorcolor.SetColor(chrono.ChColor(0.3, 0.3, 0.6))
+mfloorcolor.SetColor(chrono.ChColor(0.3, 0.3, 0.95))
 mfloor.AddAsset(mfloorcolor)
 
 # Create wall to simulate in 2D
@@ -69,7 +69,7 @@ mwall.AddAsset(mfloorcolor)
 #
 
 # Define Properties
-initial_hipPos = chrono.ChVectorD(0,0.27,0)
+
 mymass = 10 #kg
 foot_mass = mymass*0.00133 #https://exrx.net/Kinesiology/Segments
 leg_mass = mymass*0.0535
@@ -78,14 +78,16 @@ leg_length = .1
 leg_radius = 0.005
 leg_volume = math.pi*pow(leg_radius,2)*leg_length
 leg_density = leg_mass/leg_volume
-theta1 = np.radians(30)
-theta2 = np.radians(11.5)
+theta1 = np.radians(11.5)
+theta2 = np.radians(7)
 leg_inertia = chrono.ChVectorD(0.5*leg_mass*pow(leg_radius,2), (leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)),(leg_mass/12)*(3*pow(leg_radius,2)+pow(leg_length,2)))
 foot_length = 0.005
 foot_radius = 0.033
 foot_volume = math.pi*pow(foot_radius,2)*foot_length
 foot_density = foot_mass/foot_volume
 
+initial_hipPos = chrono.ChVectorD(0,0.1,0)
+print('hipPos',initial_hipPos)
 
 # Create hip
 hipBody = chrono.ChBodyEasyEllipsoid(chrono.ChVectorD(.02,.02,.02 ),leg_density,True,False,contact_material)
@@ -239,7 +241,7 @@ myapplication = chronoirr.ChIrrApp(mysystem, 'PyChrono example', chronoirr.dimen
 myapplication.AddTypicalSky()
 myapplication.AddTypicalLogo(chrono.GetChronoDataFile('logo_pychrono_alpha.png'))
 myapplication.AddTypicalCamera(chronoirr.vector3df(0,4,-6), chronoirr.vector3df(0,0,0))
-myapplication.AddTypicalCamera(chronoirr.vector3df(0, 0.35, -0.4))
+myapplication.AddTypicalCamera(chronoirr.vector3df(0, 0.3, -0.4))
 myapplication.AddTypicalLights()
 
 myapplication.AssetBindAll();
@@ -275,19 +277,24 @@ array_time = []
 array_hipY = []
 array_hipX = []
 
+
+
 while(myapplication.GetDevice().run()):
     myapplication.BeginScene()
     chronoirr.ChIrrTools.drawAllCOGs(mysystem, myapplication.GetVideoDriver(), 2)
     myapplication.DrawAll()
     t = mysystem.GetChTime()
-    # print('time: ',mysystem.GetChTime())
+    print('time: ',mysystem.GetChTime())
     # sticky_stance.Initialize(foot_stance,mfloor,foot_stance.GetFrame_REF_to_abs())
     # sticky_swing.Initialize(foot_swing,mfloor,foot_swing.GetFrame_REF_to_abs())
-    # if t<0.4:
+    if t>0.15 and t<=0.3:
+        foot_swing.SetCollide(False)
     #     sticky_stance.SetDisabled(False)
     #     sticky_swing.SetDisabled(True)
     #     # print(sticky_stance.GetLeftDOF())
-    # elif t>=0.4 and t<0.85:
+    elif t>0.3:#t>=0.4 and t<0.85:
+        foot_swing.SetCollide(True)
+        foot_stance.SetCollide(False)
     #     sticky_stance.SetDisabled(True)
     #     sticky_swing.SetDisabled(False)
     #     # print(sticky_stance.GetLeftDOF())
