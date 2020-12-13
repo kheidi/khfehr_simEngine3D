@@ -180,10 +180,10 @@ b = 30
 
 # Create swing shank
 shank_swing = chrono.ChBodyEasyCylinder(shank_radius, shank_length, shank_density,True,False,contact_material)
-center_shank_swing= swing_hip_frame*chrono.ChVectorD(-((3*shank_length)/2)*np.sin(-theta2-np.radians(a)),-((3*shank_length)/2)*np.cos(-theta2-np.radians(a)),0)
+center_shank_swing= swing_hip_frame*chrono.ChVectorD(-((3*shank_length)/2)*np.sin(-theta2-np.radians(15)),-((3*shank_length)/2)*np.cos(-theta2-np.radians(15)),0)
 print(center_shank_swing)
 q = chrono.ChQuaternionD()
-q.Q_from_AngAxis((-theta2-np.radians(b)), chrono.ChVectorD(0,0,-1))
+q.Q_from_AngAxis((-theta2-np.radians(35)), chrono.ChVectorD(0,0,-1))
 print('q',q)
 shank_swing.SetPos(center_shank_swing)
 shank_swing.SetRot(q)
@@ -210,10 +210,10 @@ if fix == True:
 
 # Create feet
 foot_swing = chrono.ChBodyEasyCylinder(foot_radius, foot_length, foot_density,True,True,contact_material)
-end_leg_swing= swing_knee_frame*chrono.ChVectorD(-(shank_length-foot_radius)*np.sin(-theta2-np.radians(a)),-(shank_length-foot_radius)*np.cos(-theta2-np.radians(a)),0)
+end_leg_swing= swing_knee_frame*chrono.ChVectorD(-(shank_length-foot_radius)*np.sin(-theta2),-(shank_length-foot_radius)*np.cos(-theta2),0)
 print(end_leg_swing)
 q1 = chrono.ChQuaternionD()
-q1.Q_from_AngAxis((-theta2-np.radians(b)), chrono.ChVectorD(0,0,-1))
+q1.Q_from_AngAxis(-theta2, chrono.ChVectorD(0,0,-1))
 q2 = chrono.ChQuaternionD()
 q2.Q_from_AngAxis(np.radians(90), chrono.ChVectorD(1,0,0))
 print('q',q1*q2)

@@ -20,7 +20,7 @@ import numpy as np
 
 mysystem      = chrono.ChSystemNSC()
 
-incline = np.radians(1)
+incline = np.radians(20)
 mysystem.Set_G_acc(chrono.ChVectorD(-9.810*np.sin(incline),-9.810*np.cos(incline),0))
 
 # Set the global collision margins. This is expecially important for very large or
@@ -56,7 +56,7 @@ mfloor.AddAsset(mfloorcolor)
 #  Create body
 
 body_A = chrono.ChBody() #body that has an auxiliary frame that is not necessarily coincident with the COG frame
-body_A.SetPos(chrono.ChVectorD(0,2,0))
+body_A.SetPos(chrono.ChVectorD(0,2,3))
 body_A.SetMass(1)
 body_A.SetInertiaXX(chrono.ChVectorD(.3,.3,.3))
 body_A.SetInertiaXY(chrono.ChVectorD(0,0,0))
@@ -250,6 +250,7 @@ ax2.grid()
 ax3.plot(array_time, array_forceC)
 ax3.set(ylabel='Y force C')
 ax3.grid()
+
 
 
 

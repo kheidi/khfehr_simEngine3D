@@ -109,6 +109,8 @@ next_n.p_i_dot = n.p_i_dot;
 next_n.p_i_dot = n.p_i_dot;
 next_n.ground = n.ground;
 
+next_n.nu = newPhi.nu_array;
+next_n.phi_q = newPhi.phi_q;
 next_n.t = t;
 
 end

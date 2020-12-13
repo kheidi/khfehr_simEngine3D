@@ -34,6 +34,9 @@ chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.0005);
 #
 #  Create the simulation system and add items
 #
+#
+#fix = True
+fix = False
 
 # Create a contact material (with default properties, shared by all collision shapes)
 contact_material = chrono.ChMaterialSurfaceNSC()
@@ -87,7 +90,7 @@ foot_radius = 0.03
 foot_volume = math.pi*pow(foot_radius,2)*foot_length
 foot_density = foot_mass/foot_volume
 
-initial_hipPos = chrono.ChVectorD(0,0.1,0)
+initial_hipPos = chrono.ChVectorD(0,leg_length,0)
 print('hipPos',initial_hipPos)
 
 # Create hip
@@ -166,23 +169,26 @@ foot_stance.SetRot(q1*q2)
 # foot_stance.SetBodyFixed(True)
 mysystem.Add(foot_stance)
 
-
+if fix == True:
+    hipBody.SetBodyFixed(True)
+    leg_stance.SetBodyFixed(True)
+    leg_swing.SetBodyFixed(True)
 
 # ---------------------------------------------------------------------
 #
 #  Add Constraints
 #
 
-Jprim1 = chrono.ChLinkMateParallel()
+zParallel = chrono.ChLinkMateParallel()
 
-Jprim1.Initialize(leg_stance,
+zParallel.Initialize(leg_stance,
                   mfloor,True,
                   chrono.ChVectorD(0,0,1),
                   chrono.ChVectorD(0,0,1),
                   chrono.ChVectorD(0,0,1),
                   chrono.ChVectorD(0,0,1))
 
-mysystem.AddLink(Jprim1)
+mysystem.AddLink(zParallel)
 
 # Add a revolute joint where the leg connects to the hip 
 hipJoint_swing = chrono.ChLinkLockRevolute()
@@ -284,6 +290,19 @@ array_stancefoot_x = []
 array_stancefoot_y = []
 array_swingfoot_x = []
 array_swingfoot_y = []
+array_floorContactF = []
+array_hip_RForce_stance_x = []
+array_hip_RForce_stance_y = []
+array_hip_RForce_stance_z = []
+array_hip_RForce_swing_x = []
+array_hip_RForce_swing_y = []
+array_hip_RForce_swing_z = []
+array_hip_RTorque_stance_x = []
+array_hip_RTorque_stance_y = []
+array_hip_RTorque_stance_z = []
+array_hip_RTorque_swing_x = []
+array_hip_RTorque_swing_y = []
+array_hip_RTorque_swing_z = []
 
 case = True
 togtime = 0
@@ -324,25 +343,6 @@ while(myapplication.GetDevice().run()):
             foot_stance.SetCollide(True)
 
            
-    
-        
-    # sticky_stance.Initialize(foot_stance,mfloor,foot_stance.GetFrame_REF_to_abs())
-    # sticky_swing.Initialize(foot_swing,mfloor,foot_swing.GetFrame_REF_to_abs())
-    # if t>0.15 and t<=0.3:
-    #     foot_swing.SetCollide(False)
-    #     sticky_stance.SetDisabled(False)
-    #     sticky_swing.SetDisabled(True)
-    #     # print(sticky_stance.GetLeftDOF())
-    # elif t>0.3:#t>=0.4 and t<0.85:
-    #     foot_swing.SetCollide(True)
-    #     foot_stance.SetCollide(False)
-    #     sticky_stance.SetDisabled(True)
-    #     sticky_swing.SetDisabled(False)
-    #     # print(sticky_stance.GetLeftDOF())
-    #     # print(sticky_stance.IsActive())
-    # else:
-    #     sticky_stance.SetDisabled(False)
-    #     sticky_swing.SetDisabled(True)
     array_time.append(mysystem.GetChTime())
     array_hipY.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.y)
     array_hipX.append(hipJoint_stance.GetLinkAbsoluteCoords().pos.x)
@@ -353,6 +353,19 @@ while(myapplication.GetDevice().run()):
     array_stancefoot_y.append(foot_stance.GetPos().y-foot_radius)
     array_swingfoot_x.append(foot_swing.GetPos().x-foot_radius)
     array_swingfoot_y.append(foot_swing.GetPos().y-foot_radius)
+    array_floorContactF.append(mfloor.GetContactForce().y)
+    array_hip_RForce_stance_x.append(hipJoint_stance.Get_react_force().x)
+    array_hip_RForce_stance_y.append(hipJoint_stance.Get_react_force().y)
+    array_hip_RForce_stance_z.append(hipJoint_stance.Get_react_force().z)
+    array_hip_RForce_swing_x.append(hipJoint_swing.Get_react_force().x)
+    array_hip_RForce_swing_y.append(hipJoint_swing.Get_react_force().y)
+    array_hip_RForce_swing_z.append(hipJoint_swing.Get_react_force().z)
+    array_hip_RTorque_stance_x.append(hipJoint_stance.Get_react_torque().x)
+    array_hip_RTorque_stance_y.append(hipJoint_stance.Get_react_torque().y)
+    array_hip_RTorque_stance_z.append(hipJoint_stance.Get_react_torque().z)
+    array_hip_RTorque_swing_x.append(hipJoint_swing.Get_react_torque().x)
+    array_hip_RTorque_swing_y.append(hipJoint_swing.Get_react_torque().y)
+    array_hip_RTorque_swing_z.append(hipJoint_swing.Get_react_torque().z)
     myapplication.DoStep()
     myapplication.EndScene()
     
@@ -377,6 +390,20 @@ df = pd.DataFrame({"time" : array_time,
                    "Stance Pos X": array_stancefoot_x,
                    "Stance Pos Y": array_stancefoot_y,
                    "Swing Pos X": array_swingfoot_x,
-                   "Swing Pos Y": array_swingfoot_y
+                   "Swing Pos Y": array_swingfoot_y,
+                   "Contact Force Y": array_floorContactF,
+                   "Stance Hip Joint R Force X": array_hip_RForce_stance_x,
+                   "Stance Hip Joint R Force Y": array_hip_RForce_stance_y,
+                   "Stance Hip Joint R Force Z": array_hip_RForce_stance_z,
+                   "Swing Hip Joint R Force X": array_hip_RForce_swing_x,
+                   "Swing Hip Joint R Force Y": array_hip_RForce_swing_y,
+                   "Swing Hip Joint R Force Z": array_hip_RForce_swing_z,
+                   "Stance Hip Joint R Torque X": array_hip_RTorque_stance_x,
+                   "Stance Hip Joint R Torque Y": array_hip_RTorque_stance_y,
+                   "Stance Hip Joint R Torque Z": array_hip_RTorque_stance_z,
+                   "Swing Hip Joint R Torque X": array_hip_RTorque_swing_x,
+                   "Swing Hip Joint R Torque Y": array_hip_RTorque_swing_y,
+                   "Swing Hip Joint R Torque Z": array_hip_RTorque_swing_z,
+                   "Case": array_case
                    })
 df.to_csv("results.csv", index=False)

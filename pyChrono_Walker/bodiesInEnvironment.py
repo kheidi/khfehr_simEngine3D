@@ -14,11 +14,15 @@ import pychrono.irrlicht as chronoirr
 import math as m
 from scipy.spatial.transform import Rotation as R
 
-
 print (" Practice of placing and connecting shapes with Irrlicht visualization")
 
 # Create a Chrono::Engine physical system
 mphysicalSystem = chrono.ChSystemNSC()
+
+# Set the global collision margins. This is expecially important for very large or
+# very small objects. Set this before creating shapes. Not before creating mysystem.
+chrono.ChCollisionModel.SetDefaultSuggestedEnvelope(0.001);
+chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001);
 
 # Create the Irrlicht visualization (open the Irrlicht device, bind a simple UI, etc, etc)
 application = chronoirr.ChIrrApp(mphysicalSystem, "Assets for Irrlicht visualization", chronoirr.dimension2du(1024, 768))

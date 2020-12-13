@@ -1,7 +1,7 @@
 function phi = free_revJoint_Phi(guess,L,t)
 
 % Needs:
-%   -p_i,p_j,r_i,r_j,d,df,ddf
+%   -p_i,p_j,r_i,r_j,d,df,ddf,pointBbar_i,pointAbar_j
 
 %% Constraints
 %%% Parallel-1
@@ -83,14 +83,14 @@ phi.phi_p = [
     con5.phi_p];
 
 %%% Find q_dot
-nu_array = [
+phi.nu_array = [
     con1.nu;
     con2.nu;
     con3.nu;
     con4.nu;
     con5.nu;
     con7.nu];
-%phi.q_dot = inv(phi.phi_q)*nu_array;
+% phi.q_dot = inv(phi.phi_q)*nu_array;
 
 
 end
