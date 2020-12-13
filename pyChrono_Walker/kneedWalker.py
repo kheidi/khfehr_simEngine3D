@@ -71,8 +71,8 @@ mwall.AddAsset(mfloorcolor)
 
 # Define Properties
 
-fix = True
-#fix = False
+#fix = True
+fix = False
 
 mymass = 10 #kg
 foot_mass = mymass*0.0133 #https://exrx.net/Kinesiology/Segments
@@ -175,8 +175,8 @@ swing_knee_frame.SetCoord(swing_kneeJoint_P.GetCoord())
 stance_knee_frame = chrono.ChFrameD()
 stance_knee_frame.SetCoord(stance_kneeJoint_P.GetCoord())
 
-a = 15
-b = 35
+a = 8
+b = 30
 
 # Create swing shank
 shank_swing = chrono.ChBodyEasyCylinder(shank_radius, shank_length, shank_density,True,False,contact_material)
