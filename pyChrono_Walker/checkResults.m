@@ -1,4 +1,3 @@
-clear;
 close all;
 M = readmatrix('results.csv');
 data = readtable('results.csv');
@@ -15,36 +14,26 @@ plot(data.time, data.angle,'b-',"LineWidth",2)
 ylabel('Angle between legs (degrees)')
 yyaxis right
 plot(data.time,ConCase,'k-',"LineWidth",2)
-ylabel('Collision Toggle Case')
-xlabel('Time (s)')
+ylabel('Constraint Condition Case')
 xlim([0, data.time(end)])
 ax = gca;
 ax.YAxis(1).Color = 'b';
 ax.YAxis(2).Color = 'k';
 
 figure
-plot3(data.time,data.StancePosX,data.StancePosY,'LineWidth',2,'Color','#D81B60')
+plot(data.StancePosX*(-1),data.StancePosY,'LineWidth',2,'Color','#D81B60')
 hold on
-plot3(data.time,data.SwingPosX,data.SwingPosY,'LineWidth',2,'Color','#90C3F1')
-[x y] = meshgrid(-1.5:0.1:1.5); % Generate x and y data
-z = zeros(size(x, 1)); % Generate z data
-surf(x, y, z,'EdgeColor','none') % Plot the surface
-alpha 0.1
+plot(data.SwingPosX*(-1),data.SwingPosY,'LineWidth',2,'Color','#90C3F1')
+yline(0)
 legend('Stance','Swing')
-ylabel('X (m)')
-zlabel('Y (m)')
-xlabel('Time (s)')
-grid on
-ylim([-0.2,0.1])
-zlim([-0.02,0.05])
-
-
+ylabel('Y (m)')
+xlabel('X (m)')
 
 figure
-plot(data.time,(-1)*data.ContactForceY,'-k','LineWidth',1)
-ylim([-20 140])
+plot(data.time,data.ContactForceY,'-k','LineWidth',1)
+ylim([-140 20])
 ylabel('Vertical Ground Reaction Force (N)')
-xlabel('Time (s)')
+xlabel('Time')
 xlim([0, data.time(end)])
 
 figure
@@ -61,7 +50,6 @@ plot(data.time,data.StanceHipJointRForceY,'r','LineWidth',1,'Color','#D81B60')
 hold on
 plot(data.time,data.SwingHipJointRForceY,'b','LineWidth',1,'Color','#90C3F1')
 hold off
-legend('Stance','Swing')
 ylabel('Force in Y-direction (N)')
 xlim([0, data.time(end)])
 subplot(3,1,3)
@@ -80,7 +68,6 @@ plot(data.time,data.StanceHipJointRTorqueX,'r','LineWidth',1,'Color','#D81B60')
 hold on
 plot(data.time,data.SwingHipJointRTorqueX,'b','LineWidth',1,'Color','#90C3F1')
 hold off
-legend('Stance','Swing')
 ylabel('Torque in X-direction (Nm)')
 xlim([0, data.time(end)])
 subplot(3,1,2)
